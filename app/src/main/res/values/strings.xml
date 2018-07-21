@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Game Time Giving</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <!-- Settings -->
+    <string name="facebook_application_id" translatable="false">214236638786404</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb214236638786404</string>
+    <string name="twitter_consumer_key" translatable="false">3qNkkdNh3vahsZ1i9xTIXqKAV</string>
+    <string name="twitter_consumer_secret" translatable="false">8JJe8Avu5MLgmngd8oMrSaTYQosuYn56aF9kcHibIToMdEDo0h</string>
+    <string name="game_board_title">Game Board</string>
+    <string name="your_pledges">My Pledge:</string>
+    <string name="undo_last_pledge">UNDO LAST PLEDGE</string>
+    <string name="_0">0</string>
+    <string name="period">Time Left</string>
+    <string name="teams">View Teams</string>
+    <string name="teamstats">Team Stats</string>
+    <string name="mystats">My Stats</string>
+    <string name="profile">My Profile</string>
+    <string name="charities">View Charities</string>
+
+</resources>

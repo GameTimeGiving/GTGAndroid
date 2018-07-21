@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/user"
+            android:title="@string/profile"/>
+        <item
+            android:id="@+id/nav_stats"
+            android:icon="@drawable/iconstats"
+            android:title="@string/mystats"/>
+        <item
+            android:id="@+id/nav_teamstats"
+            android:icon="@drawable/usericon"
+            android:title="@string/teamstats"/>
+        <item
+            android:id="@+id/nav_teams"
+            android:icon="@drawable/iconteam"
+            android:title="@string/teams"/>
+        <item
+            android:id="@+id/nav_charities"
+            android:icon="@drawable/usericon"
+            android:title="@string/charities"/>
+    </group>
+</menu>
