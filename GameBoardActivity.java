@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.constraint.Group;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
@@ -19,6 +20,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -27,6 +30,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -45,6 +50,8 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
     public String MyPledgeAmount;
     public Boolean PreferredCharityNoticeShown;
     public boolean bFirstTimeIn = true;
+    final public FirebaseFirestore db = FirebaseFirestore.getInstance();
+    public Game mGame;
     //  public Game mGame = null;
     Utilities utilities = new Utilities();
     Timer timer;
@@ -75,6 +82,7 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
             btnPayNow;
     private String mToken;
     private LruCache<Integer, Bitmap> imageMemCache;
+    public Player mPlayer = new Player();
 
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -98,8 +106,10 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
                             .build(),
                     RC_SIGN_IN);
         }
-        player.setPlayer_id();
-
+        String userId = auth.getUid();
+        mPlayer.setPlayer_id(userId);
+        mGame = new Game();
+        mGame.setGameid("suYroi6ZuratHkBDuyF7");
         setContentView(R.layout.gameboard);
         //Find and set all the textviews on the view
         tv_HomeTeamName = findViewById(R.id.HomeTeamName);
@@ -147,14 +157,14 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
     }
 
     public void GetAGame() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference docRef = db.collection("games").document("suYroi6ZuratHkBDuyF7");
-        docRef.get().addOnCompleteListener(task -> {
+        //  FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference gameRef = db.collection("games").document(mGame.getGameid());
+        gameRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
-
-                    Game mGame = document.toObject(Game.class);
+                    mGame = document.toObject(Game.class);
+                    mGame.setGameid(gameRef.getId());
                     Log.d(TAG, String.format("GameData - Player Pledge: %s",
                             Integer.toString(mGame.getPlayer().getPledgetotal())));
                     SetGameBoardMode(mGame);
@@ -172,10 +182,6 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
     public ArrayList<Game> GetGames() {
         // int gameId = 001;
         ArrayList<Game> listOfGames = new ArrayList<Game>();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        //suYroi6ZuratHkBDuyF7
-        //51CWdhfx2W7N0xWCn4zA
         db.collection("games")
                 .get()
                 .addOnCompleteListener(task -> {
@@ -193,7 +199,6 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void SetGameBoardMode(Game mGame) {
-        Log.d(TAG, String.format("The status of the game is %s", mGame.getGamestatus()));
         View l = findViewById(R.id.pledgeButtons);
         View ppl = null; //TODO: Replace this with a group
         switch (mGame.getGamestatus()) {
@@ -272,10 +277,30 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
      *
      * */
     private void addPledges(int value) {
-        Log.d(TAG, String.format("Pledged:%s", Integer.toString(value)));
         mUndoLastPledge.setEnabled(true);
         mMyLastPledge = value;
-        player.setMyLastPledgeAmount(value);
+        //Write to plegde table
+        Map<String, Object> pledge = new HashMap<>();
+        pledge.put("game", mGame.getGameid());
+        pledge.put("user", mPlayer.getPlayer_id());
+        pledge.put("amount", value);
+        db.collection("pledges")
+                .add(pledge)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference pledgeRef) {
+                        //Log.d(TAG,String.format("Document %s successfully written!",pledgeRef.getId()));
+                        mPlayer.setMylastpledgeid(pledgeRef.getId());
+                        mPlayer.setMylastpledgeamount(value);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
+
         openDailogPledgesAdd(value);
     }
 
@@ -286,17 +311,8 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
      * */
     private void undoLastPledge() {
         mUndoLastPledge.setEnabled(false);
-        //   player.setMyTotalPledgeAmount(player.getMyTotalPledgeAmount(this) - player.getMyLastPledgeAmount());
-        //   tv_pledges.setText(utilities.FormatCurrency(player.getMyTotalPledgeAmount(this)));
-        openDailogPledgesAdd(mMyLastPledge * -1);
-        //TODO:Remove personal pledge from server totals
-        Pledge pledge = new Pledge(this);
-        pledge.setAmount(player.getMyLastPledgeAmount() * -1);
-        pledge.setUser(player.getPlayer_id());//TODO:Get the User ID
-        pledge.setPreferredCharity_id();
-        //  pledge.setGame_id(mGame.getGameid());
-        // pledge.setTeam_id(mGame.getMyteam().getTeamId());
-        pledge.SubmitPledge();
+        int mylastpledgeamount = mPlayer.getMylastpledgeamount() * -1;
+        addPledges(mylastpledgeamount);
 
     }
 

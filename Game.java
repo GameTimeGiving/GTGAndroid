@@ -7,6 +7,8 @@ import com.google.firebase.firestore.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class Game implements Parcelable {
+
+    private final String TAG = getClass().getSimpleName();
     public static final Creator<Game> CREATOR = new Creator<Game>() {
         @Override
         public Game createFromParcel(Parcel in) {
@@ -18,7 +20,6 @@ public class Game implements Parcelable {
             return new Game[size];
         }
     };
-    private final String TAG = getClass().getSimpleName();
     private String gamestatus;
     private String period;
     private String timeleft;
@@ -28,45 +29,13 @@ public class Game implements Parcelable {
     private int awayteampledgetotal;
     private Player player;
     private Team hometeam;
-//    private Team myteam;
-
-    //    private @ServerTimestamp Date startdate;
-//    private String hometeamlogo;
-//    private String awayteamlogo;
-    //   private int gameid;
     private Team awayteam;
 
     public Game() {
 
     }
 
-    public Game(String gamestatus,
-                String period,
-                String timeleft,
-                int hometeamscore,
-                int awayteamscore,
-                int hometeampledgetotal,
-                int awayteampledgetotal,
-                Team hometeam,
-                Team awayteam,
-                Player player) {
-        this.gamestatus = gamestatus;
-        this.period = period;
-        this.timeleft = timeleft;
-        this.hometeamscore = hometeamscore;
-        this.awayteamscore = awayteamscore;
-        this.hometeampledgetotal = hometeampledgetotal;
-        this.awayteampledgetotal = awayteampledgetotal;
-        this.hometeam = hometeam;
-        this.awayteam = awayteam;
-        this.player = player;
-        //        this.gameid=gameid;
-//        this.myteam=myteam;
-//        this.startdate=startdate;
-//        this.hometeamlogo=hometeamlogo;
-//        this.awayteamlogo=awayteamlogo;
-
-    }
+    private String gameid;
 
     protected Game(Parcel in) {
         gamestatus = in.readString();
@@ -154,13 +123,39 @@ public class Game implements Parcelable {
     public void setHometeam(Team hometeam) {
         this.hometeam = hometeam;
     }
-    //    public int getGameid() {
-//        return gameid;
-//    }
-//
-//    public void setGameid(int gameid) {
-//        this.gameid = gameid;
-//    }
+
+    public Game(
+            String gamestatus,
+            String period,
+            String timeleft,
+            int hometeamscore,
+            int awayteamscore,
+            int hometeampledgetotal,
+            int awayteampledgetotal,
+            Team hometeam,
+            Team awayteam,
+            Player player) {
+        this.gamestatus = gamestatus;
+        this.period = period;
+        this.timeleft = timeleft;
+        this.hometeamscore = hometeamscore;
+        this.awayteamscore = awayteamscore;
+        this.hometeampledgetotal = hometeampledgetotal;
+        this.awayteampledgetotal = awayteampledgetotal;
+        this.hometeam = hometeam;
+        this.awayteam = awayteam;
+        this.player = player;
+        //        this.gameid=gameid;
+//        this.myteam=myteam;
+//        this.startdate=startdate;
+//        this.hometeamlogo=hometeamlogo;
+//        this.awayteamlogo=awayteamlogo;
+
+    }
+
+    public String getGameid() {
+        return gameid;
+    }
 
 
 //    public Team getMyteam() {
@@ -210,6 +205,9 @@ public class Game implements Parcelable {
         return 0;
     }
 
+    public void setGameid(String gameid) {
+        this.gameid = gameid;
+    }
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(gamestatus);

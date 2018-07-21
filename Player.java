@@ -5,15 +5,30 @@ import android.content.Context;
 public class Player {
     private static final String TAG = "Player";
     public Utilities utilities = new Utilities();
-    private int player_id;
+    private String player_id;
     private int myteam_id;
     private int pledgetotal;
-    private int myLastPledgeAmount;
+
+
+    private String mylastpledgeid;
+    private int mylastpledgeamount;
     private Charity[] myCharities;
     private Team[] myTeams;
 
     Player() {
 
+    }
+
+    Player(String player_id) {
+        this.player_id = player_id;
+    }
+
+    public String getPlayer_id() {
+        return player_id;
+    }
+
+    public void setPlayer_id(String player_id) {
+        this.player_id = player_id;
     }
 
     public Player(int pledgetotal) {
@@ -34,13 +49,6 @@ public class Player {
         this.pledgetotal = pledgetotal;
     }
 
-    public int getPlayer_id() {
-        return player_id;
-    }
-
-    public void setPlayer_id() {
-        this.player_id = 2;
-    }
 
     public int getMyteam_id() {
         return myteam_id;
@@ -67,11 +75,20 @@ public class Player {
         this.myTeams = myTeams;
     }
 
-    public int getMyLastPledgeAmount() {
-        return myLastPledgeAmount;
+    public String getMylastpledgeid() {
+        return mylastpledgeid;
     }
 
-    public void setMyLastPledgeAmount(int myLastPledgeAmount) {
-        this.myLastPledgeAmount = myLastPledgeAmount;
+    public void setMylastpledgeid(String mylastpledgeid) {
+        this.mylastpledgeid = mylastpledgeid;
     }
+
+    public int getMylastpledgeamount() {
+        return mylastpledgeamount;
+    }
+
+    public void setMylastpledgeamount(int mylastpledgeamount) {
+        this.mylastpledgeamount = mylastpledgeamount;
+    }
+
 }
