@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.widget.Toast;
 
 import java.text.NumberFormat;
+import java.text.ParseException;
 
 public class Utilities {
     public void ShowMsg(String message, Context ctx) {
@@ -57,7 +58,6 @@ public class Utilities {
 
 
     public String FormatCurrency(double num) {
-
         String value;
         NumberFormat defaultFormat = NumberFormat.getCurrencyInstance();
         return defaultFormat.format(num);
@@ -65,7 +65,14 @@ public class Utilities {
     }
 
     public int RemoveCurrency(String dollars) {
-        return Integer.parseInt(dollars.replace("$", "").replace(".00", ""));
+        NumberFormat format = NumberFormat.getCurrencyInstance();
+        Number number = 0;
+        try {
+            number = format.parse(dollars);
+        } catch (ParseException e) {
+            number = 0;
+        }
+        return (int) (long) number;
     }
 
     public void ClearSharedPrefs(Activity activity) {

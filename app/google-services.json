@@ -49,48 +49,6 @@
           "status": 2
         }
       }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:981905831875:android:5061168c0991404f",
-        "android_client_info": {
-          "package_name": "com.gametimegiving.mobile"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "981905831875-2478ajkqu1be5iufn971flq4bs4uotmp.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.gametimegiving.mobile",
-            "certificate_hash": "526d87008118fe1fd08b3790b74332d56ff78228"
-          }
-        },
-        {
-          "client_id": "981905831875-vvucgikafn0o9cjgfl6eqmv5f79gg5j7.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDer-o9INmSfZ7bITUbqfREQunSZACiLDA"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 2,
-          "analytics_property": {
-            "tracking_id": "UA-61235178-1"
-          }
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
     }
   ],
   "configuration_version": "1"

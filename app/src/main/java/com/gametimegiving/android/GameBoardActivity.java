@@ -1,6 +1,7 @@
 
 package com.gametimegiving.android;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -19,14 +20,27 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.braintreepayments.api.dropin.DropInActivity;
+import com.braintreepayments.api.dropin.DropInRequest;
+import com.braintreepayments.api.dropin.DropInResult;
+import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.TextHttpResponseHandler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +48,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.annotation.Nullable;
+
+import cz.msebera.android.httpclient.Header;
 
 public class GameBoardActivity extends AppCompatActivity implements View.OnClickListener {
     private final static int SUBMIT_PAYMENT_REQUEST_CODE = 100;
@@ -46,24 +64,32 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
     private final Player player = new Player();
     public Integer ActiveGameID,
             mUserTeamID;
-    public String ClientToken;
+    final String API_GET_TOKEN = "http://x1.gametimegiving.com/experiment/GenerateToken";
+    final String API_CHECK_OUT = "http://x1.gametimegiving.com/experiment/CreateTransaction";
+    // public String tokenizationKey = "sandbox_mdys6zxr_jstvnq9hgzfgrt79";
+    final int REQUEST_CODE = 999;
+    public Game mGame = new Game();
     public Payment payment;
     public String MyPledgeAmount;
     public Boolean PreferredCharityNoticeShown;
     public boolean bFirstTimeIn = true;
-    public Game mGame;
+    HashMap<String, String> paramsHash;
     public Player mPlayer = new Player();
     //  public Game mGame = null;
     Utilities utilities = new Utilities();
-    Timer timer;
-    TimerTask timerTask;
     Group pledgeButtons;
     private ImageView mHomeLogo,
             mAwayLogo;
     private Context context;
     private String[] arr = null;
-    private Integer mMyPledgeTotals = 0,
-            mMyLastPledge = 0;
+    ImageView ivHomeTeamLogo, ivAwayTeamLogo;
+    private String mClientToken;
+    private Button mUndoLastPledge,
+            pledgeBtn1,
+            pledgeBtn2,
+            pledgeBtn3,
+            btnPayNow;
+    private Integer mMyLastPledge = 0;
     private TextView tv_VisitorTeamName,
             tv_HomeTeamName,
             tv_homeTeamMascot,
@@ -75,15 +101,11 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
             tv_HomeTeamPledgeTotals,
             tv_AwayTeamPledgeTotals,
             tv_GamePeriod,
-            tv_PreferredCharityNotice;
-    private Button mUndoLastPledge,
-            pledgeBtn1,
-            pledgeBtn2,
-            pledgeBtn3,
-            btnPayNow;
-    private String mToken;
+            tv_PreferredCharityNotice,
+            tvGameNotStarted;
     private LruCache<Integer, Bitmap> imageMemCache;
-
+    private AsyncHttpClient client = new AsyncHttpClient();
+    private double TransactionAmt = 0;
     protected void onCreate(Bundle savedInstanceState) {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -106,11 +128,15 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
                             .build(),
                     RC_SIGN_IN);
         }
+
         String userId = auth.getUid();
-        mPlayer.setPlayer_id(userId);
-        mGame = new Game();
+        mPlayer.setPlayer(userId);
+        //TODO:(1)As a User I can pick a game and that game will be pulled up on the game board. Shared preeferences maybe?
         mGame.setGameid("suYroi6ZuratHkBDuyF7");
+        //TODO:(2) As a user I can pick my team. Either I follow the team already or I can pick one to follow then.
+        mPlayer.setMyteam("away");
         setContentView(R.layout.gameboard);
+        tvGameNotStarted = findViewById(R.id.gamenotstarted);
         //Find and set all the textviews on the view
         tv_HomeTeamName = findViewById(R.id.HomeTeamName);
         tv_homeTeamMascot = findViewById(R.id.HomeTeamMascot);
@@ -122,6 +148,8 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         tv_HomeTeamPledgeTotals = findViewById(R.id.tv_HomeTeamPledges);
         tv_AwayTeamPledgeTotals = findViewById(R.id.tv_AwayTeamPledges);
         tv_GamePeriod = findViewById(R.id.tv_GamePeriod);
+        ivHomeTeamLogo = findViewById(R.id.hometeamlogo);
+        ivAwayTeamLogo = findViewById(R.id.awayteamlogo);
         //Find and set all the buttons on the view
         mUndoLastPledge = findViewById(R.id.btnundolastpledge);
         mUndoLastPledge.setOnClickListener(this);
@@ -157,26 +185,99 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
     }
 
     public void GetAGame() {
-        //  FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference gameRef = db.collection("games").document(mGame.getGameid());
-        gameRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document.exists()) {
-                    mGame = document.toObject(Game.class);
+        gameRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "Listen failed.", e);
+                    return;
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    Log.d(TAG, "Current data: " + snapshot.getData());
+                    mGame = snapshot.toObject(Game.class);
                     mGame.setGameid(gameRef.getId());
                     Log.d(TAG, String.format("GameData - Player Pledge: %s",
                             Integer.toString(mGame.getPlayer().getPledgetotal())));
+                    GetTeamLogos();
                     SetGameBoardMode(mGame);
-                    UpdateGameBoard(mGame);
+
                 } else {
-                    Log.d(TAG, "No such document");
+                    Log.d(TAG, "Current data: null");
                 }
-            } else {
-                Log.d(TAG, "get failed with ", task.getException());
+            }
+        });
+    }
+
+    private void GetClientToken() {
+
+        client.get(API_GET_TOKEN, new TextHttpResponseHandler() {
+
+            @Override
+            public void onStart() {
+                // called before request is started
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, String token) {
+                mClientToken = token.substring(1, token.length() - 1);
+                Log.d(TAG, String.format("mClientToken:%s", mClientToken));
+                btnPayNow.setEnabled(true);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String errorResponse, Throwable e) {
+                Log.d(TAG, String.format("Error getting the client token: %s", errorResponse));
+
+            }
+
+            @Override
+            public void onRetry(int retryNo) {
+                // called when request is retried
+            }
+        });
+
+    }
+
+    private void GetTeamLogos() {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        String homeTeamLogo = mGame.getHometeam().getLogo();
+        String awayTeamLogo = mGame.getAwayteam().getLogo();
+        StorageReference homeTeamLogoReference = storage.getReferenceFromUrl(homeTeamLogo);
+        StorageReference awayTeamLogoReference = storage.getReferenceFromUrl(awayTeamLogo);
+        Glide.with(this /* context */)
+                .using(new FirebaseImageLoader())
+                .load(homeTeamLogoReference)
+                .into(ivHomeTeamLogo);
+        Glide.with(this /* context */)
+                .using(new FirebaseImageLoader())
+                .load(awayTeamLogoReference)
+                .into(ivAwayTeamLogo);
+    }
+
+    private void GetPersonalPledge() {
+        DocumentReference playerRef = db.collection("players").document("d5EASA7VcjebVFaPuSIA");
+        playerRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    mPlayer = document.toObject(Player.class);
+                    Log.d(TAG, String.format("Pl%s has pledged $ %s in game %s", mPlayer.getPlayer(),
+                            Integer.toString(mPlayer.getPledgetotal()),
+                            mPlayer.getGame()));
+                    UpDatePersonalPledgeTotal(mPlayer);
+                }
             }
 
         });
+    }
+
+    private void UpDatePersonalPledgeTotal(Player player) {
+        tv_MyTotalPledgeTotals.setText(utilities.FormatCurrency(player.getPledgetotal()));
+        btnPayNow.setText(String.format("Donate %s ", tv_MyTotalPledgeTotals.getText()));
+
     }
 
     public ArrayList<Game> GetGames() {
@@ -191,107 +292,123 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
                             Game game = document.toObject(Game.class);
                             listOfGames.add(game);
                         }
-                    } else {
-                        Log.w(TAG, "Error getting documents.", task.getException());
                     }
                 });
         return listOfGames;
     }
 
     private void SetGameBoardMode(Game mGame) {
-        View l = findViewById(R.id.pledgeButtons);
-        View ppl = null; //TODO: Replace this with a group
+        Group pledgeButtons = findViewById(R.id.pledgeButtons);
         switch (mGame.getGamestatus()) {
             case Constant.GAMENOTSTARTED:
                 pledgeButtons.setVisibility(View.GONE);
-                // mGame.ClearBoard();
+                tvGameNotStarted.setText(String.format("Game Not Started"));
+                tvGameNotStarted.setVisibility(View.VISIBLE);
+                ClearGameBoard();
                 break;
             case Constant.GAMEINPROGRESS:
                 pledgeButtons.setVisibility(View.VISIBLE);
-                l.setVisibility(View.VISIBLE);
                 btnPayNow.setVisibility(View.GONE);
+                tvGameNotStarted.setVisibility(View.GONE);
+                GetPersonalPledge();
                 break;
             case Constant.GAMEOVER:
-                if (tv_pledges.getText() != "") {
-                    MyPledgeAmount = tv_pledges.getText().toString();
-                    l.setVisibility(View.GONE);
+                GetClientToken();
+                GetPersonalPledge();
                     pledgeButtons.setVisibility(View.GONE);
+                tvGameNotStarted.setVisibility(View.GONE);
                     btnPayNow.setVisibility(View.VISIBLE);
-                    btnPayNow.setOnClickListener(v -> MakeBrainTreePayment());
-                } else {
-                    utilities.ShowMsg("You have no pledges", this);
-
-                }
+                btnPayNow.setEnabled(false);
+                //  btnPayNow.setOnClickListener(v -> MakeBrainTreePayment());
                 break;
         }
+        UpdateGameBoard(mGame);
     }
 
-    private void MakeBrainTreePayment() {
-//        Customization customization = new Customization.CustomizationBuilder()
-//                .primaryDescription("My Pledge  ")
-//                .amount(MyPledgeAmount)
-//                .submitButtonText("Donate Now")
-//                .build();
-//        Intent intent = new Intent(context, BraintreePaymentActivity.class)
-//                .putExtra(BraintreePaymentActivity.EXTRA_CLIENT_TOKEN,
-//                        ClientToken);
-//        intent.putExtra(BraintreePaymentActivity.EXTRA_CUSTOMIZATION, customization);
-//        startActivityForResult(intent, SUBMIT_PAYMENT_REQUEST_CODE);
+    private void ClearGameBoard() {
+        mGame.setHometeamscore(0);
+        mGame.setAwayteamscore(0);
+        mGame.setTimeleft("00:00");
+        mGame.setHometeampledgetotal(0);
+        mGame.setAwayteampledgetotal(0);
+        mPlayer.setPledgetotal(0);
+        UpDatePersonalPledgeTotal(mPlayer);
     }
 
+
+    public void onBraintreeSubmit(View v) {
+        btnPayNow.setEnabled(false);
+        TransactionAmt = Double.parseDouble(tv_MyTotalPledgeTotals.getText().toString().replaceAll("(?<=\\d),(?=\\d)|\\$", ""));
+        DropInRequest dropInRequest = new DropInRequest()
+                .clientToken(mClientToken); //"sandbox_mdys6zxr_jstvnq9hgzfgrt79"
+        startActivityForResult(dropInRequest.getIntent(GameBoardActivity.this), REQUEST_CODE);
+    }
 
     @Override
-    protected void onActivityResult(int requestCode,
-                                    int resultCode, Intent data) {
-//TODO:Add the Braintree functionality back into the project
-//        if (requestCode == SUBMIT_PAYMENT_REQUEST_CODE) {
-//            if (resultCode == BraintreePaymentActivity.RESULT_OK) {
-//                String nonce = data.getStringExtra(
-//                        BraintreePaymentActivity.EXTRA_PAYMENT_METHOD_NONCE
-//                );
-
-
-        //               SendNonceToBraintree(nonce, MyPledgeAmount);
-        //           }
-        //      }
-    }
-
-    private void TurnOffPledgeMechanisms(View l, View ppl, Button btn, Button btnPay) {
-        ppl.setVisibility(View.GONE);
-        l.setVisibility(View.GONE);
-        btn.setVisibility(View.GONE);
-        btnPay.setVisibility(View.GONE);
-    }
-
-
-    private void getGameName() {
-        if (getIntent().getExtras() != null) {
-            String games = getIntent().getExtras().getString("selectedgame");
-
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                DropInResult result = data.getParcelableExtra(DropInResult.EXTRA_DROP_IN_RESULT);
+                // use the result to update your UI and send the payment method nonce to your server
+                String PaymentMethodNonce = result.getPaymentMethodNonce().getNonce();
+                SendPaymentMethod(PaymentMethodNonce, TransactionAmt);
+                Log.d(TAG, String.format("PaymentMethodNonce:%s", PaymentMethodNonce));
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                // the user canceled
+                Log.d(TAG, String.format("Result Cancelled:%s", Activity.RESULT_CANCELED));
+            } else {
+                // handle errors here, an exception may be available in
+                Exception error = (Exception) data.getSerializableExtra(DropInActivity.EXTRA_ERROR);
+                Log.d(TAG, String.format("Activity OK: %s Exception:%s",
+                        Activity.RESULT_OK,
+                        error.toString()));
+            }
         }
     }
 
 
-    /*
-     * Add Pledges
-     *
-     * */
-    private void addPledges(int value) {
-        mUndoLastPledge.setEnabled(true);
-        mMyLastPledge = value;
-        //Write to plegde table
+    void SendPaymentMethod(String nonce, double amt) {
+        RequestParams params = new RequestParams();
+        params.put("nonce", nonce);
+        params.put("amt", amt);
+        client.post(API_CHECK_OUT, params,
+                new AsyncHttpResponseHandler() {
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                        Log.d(TAG, String.format("Payment Successful:%s", responseBody.toString()));
+                        btnPayNow.setEnabled(false);
+                        btnPayNow.setText("Payment Successful");
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                        Log.d(TAG, String.format("Payment Not Successful:%s", error.toString()));
+                        btnPayNow.setText("Try Again.. Payment NOT Successful");
+
+                    }
+                }
+        );
+    }
+
+    private void addPledges(int amount) {
         Map<String, Object> pledge = new HashMap<>();
         pledge.put("game", mGame.getGameid());
-        pledge.put("user", mPlayer.getPlayer_id());
-        pledge.put("amount", value);
+        pledge.put("user", mPlayer.getPlayer());
+        pledge.put("amount", amount);
+        pledge.put("myteam", mPlayer.getMyteam());
+        UpdateGameBoardLocal(mPlayer.getMyteam(), amount);
         db.collection("pledges")
                 .add(pledge)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference pledgeRef) {
-                        //Log.d(TAG,String.format("Document %s successfully written!",pledgeRef.getId()));
+                        Log.d(TAG, String.format(""));
                         mPlayer.setMylastpledgeid(pledgeRef.getId());
-                        mPlayer.setMylastpledgeamount(value);
+                        mMyLastPledge = amount;
+                        if (amount > 0) {
+                            mUndoLastPledge.setEnabled(true);
+                        }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -301,19 +418,26 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
                     }
                 });
 
-        openDailogPledgesAdd(value);
+        openDailogPledgesAdd(amount);
     }
 
-    /*
-     *
-     * Undo Pledges
-     *
-     * */
-    private void undoLastPledge() {
-        mUndoLastPledge.setEnabled(false);
-        int mylastpledgeamount = mPlayer.getMylastpledgeamount() * -1;
-        addPledges(mylastpledgeamount);
+    private void UpdateGameBoardLocal(String myTeam, int pledgeAmount) {
+        int hometeampledgetotal = utilities.RemoveCurrency(tv_HomeTeamPledgeTotals.getText().toString());
+        int awayteampledgetotal = utilities.RemoveCurrency(tv_AwayTeamPledgeTotals.getText().toString());
+        int playerpledgetotal = utilities.RemoveCurrency(tv_MyTotalPledgeTotals.getText().toString());
 
+        if (myTeam == "home") {
+            tv_HomeTeamPledgeTotals.setText(utilities.FormatCurrency(hometeampledgetotal + pledgeAmount));
+        } else {
+            tv_AwayTeamPledgeTotals.setText(utilities.FormatCurrency(awayteampledgetotal + pledgeAmount));
+        }
+        tv_MyTotalPledgeTotals.setText(utilities.FormatCurrency(playerpledgetotal + pledgeAmount));
+
+    }
+
+    private void undoLastPledge() {
+        addPledges(mMyLastPledge * -1);
+        mUndoLastPledge.setEnabled(false);
     }
 
 
@@ -365,7 +489,7 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         pledgeDialog.setContentView(R.layout.dialogpledges);
         TextView tv_pledge_donation = pledgeDialog.findViewById(R.id.tv_pledge_donation);
         if (pledge_value < 0) {
-            sConfirmation = String.format("<center>Oops! Your last pledge of <br /><b>%s</b><br /> has been undone.</center>", utilities.FormatCurrency(pledge_value).replace("-", ""));
+            sConfirmation = String.format("<center>Oops! Your <b>%s Pledge</b><br />has been undone.</center>", utilities.FormatCurrency(pledge_value).replace("-", ""));
 
         } else {
             sConfirmation = String.format("<center>Great Job! Your pledge of <br /><b>%s</b><br /> is confirmed.</center>", utilities.FormatCurrency(pledge_value));
@@ -391,11 +515,8 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         tv_homeTeamMascot.setText(mGame.getHometeam().getMascot());
         tv_VisitorTeamName.setText(mGame.getAwayteam().getTeamname());
         tv_visitorTeamMascot.setText(mGame.getAwayteam().getMascot());
-        //       tv_pledges.setText(String.format("%s", utilities.FormatCurrency(player.getMyTotalPledgeAmount(this))));
-
         tv_HomeTeamPledgeTotals.setText(utilities.FormatCurrency(mGame.getHometeampledgetotal()));
         tv_AwayTeamPledgeTotals.setText(utilities.FormatCurrency(mGame.getAwayteampledgetotal()));
-        tv_MyTotalPledgeTotals.setText(utilities.FormatCurrency(mGame.getPlayer().getPledgetotal()));
     }
 
 

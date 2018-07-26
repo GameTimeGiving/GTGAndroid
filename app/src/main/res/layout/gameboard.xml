@@ -37,8 +37,8 @@
 
         <ImageView
             android:id="@+id/hometeamlogo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="125dp"
+            android:layout_height="125dp"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
@@ -122,8 +122,8 @@
 
         <ImageView
             android:id="@+id/awayteamlogo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="125dp"
+            android:layout_height="125dp"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
@@ -290,10 +290,24 @@
             app:layout_constraintVertical_bias="0.0"
             tools:text="$0.00"/>
 
+        <TextView
+            android:id="@+id/gamenotstarted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#fff"
+            android:textSize="20sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/PledgeButton2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/myPledge"/>
+
         <Button
             android:id="@+id/btnpaynow"
-            android:layout_width="100dp"
-            android:layout_height="25dp"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:onClick="onBraintreeSubmit"
+            android:paddingEnd="12dp"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
@@ -304,9 +318,12 @@
             android:textColor="#fff"
             android:textStyle="bold"
             android:visibility="gone"
+
+            android:paddingStart="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/myPledge"
             tools:text="Donate Now"/>
 
         <Button
@@ -393,17 +410,19 @@
             android:id="@+id/pledgeButtons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:constraint_referenced_ids="PledgeButton1,PledgeButton2,PledgeButton3"/>
+            app:constraint_referenced_ids="PledgeButton1,PledgeButton2,PledgeButton3,btnundolastpledge"/>
 
-        <!-- Guidelines -->
+        <!-- Guidelines
+        android:layout_marginBottom="725dp"
+        -->
         <android.support.constraint.Guideline
             android:id="@+id/GLTeamLogo"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginBottom="704dp"
+
             android:layout_marginEnd="16dp"
             android:layout_marginRight="16dp"
-            android:layout_marginTop="27dp"
+            android:layout_marginTop="15dp"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

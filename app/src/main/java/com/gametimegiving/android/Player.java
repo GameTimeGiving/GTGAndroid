@@ -5,11 +5,10 @@ import android.content.Context;
 public class Player {
     private static final String TAG = "Player";
     public Utilities utilities = new Utilities();
-    private String player_id;
-    private int myteam_id;
+    private String user;
+    private String myteam;
+    private String game;
     private int pledgetotal;
-
-
     private String mylastpledgeid;
     private int mylastpledgeamount;
     private Charity[] myCharities;
@@ -19,13 +18,12 @@ public class Player {
 
     }
 
-    Player(String player_id) {
-        this.player_id = player_id;
+    Player(String game, int pledgetotal, String user) {
+        this.game = game;
+        this.pledgetotal = pledgetotal;
+        this.user = user;
     }
 
-    public Player(int pledgetotal) {
-        this.pledgetotal = pledgetotal;
-    }
 
     public static boolean isRegisteredPlayer(String userName, String pwd, Context context) {
         Boolean registeredPlayer = false;
@@ -33,12 +31,12 @@ public class Player {
         return registeredPlayer;
     }
 
-    public String getPlayer_id() {
-        return player_id;
+    public String getPlayer() {
+        return user;
     }
 
-    public void setPlayer_id(String player_id) {
-        this.player_id = player_id;
+    public void setPlayer(String user) {
+        this.user = user;
     }
 
     public int getPledgetotal() {
@@ -49,46 +47,35 @@ public class Player {
         this.pledgetotal = pledgetotal;
     }
 
-
-    public int getMyteam_id() {
-        return myteam_id;
+    public String getGame() {
+        return game;
     }
 
-    public void setMyteam_id(int myteam_id) {
-        this.myteam_id = myteam_id;
+    public void setGame(String game) {
+        this.game = game;
     }
 
-
-    public Charity[] getMyCharities() {
-        return myCharities;
+    public String getUser() {
+        return user;
     }
 
-    public void setMyCharities(Charity[] myCharities) {
-        this.myCharities = myCharities;
+    public void setUser(String user) {
+        this.user = user;
     }
 
-    public Team[] getMyTeams() {
-        return myTeams;
+    public String getMyteam() {
+        return myteam;
     }
 
-    public void setMyTeams(Team[] myTeams) {
-        this.myTeams = myTeams;
+    public void setMyteam(String myteam) {
+        this.myteam = myteam;
     }
 
-    public String getMylastpledgeid() {
-        return mylastpledgeid;
-    }
 
     public void setMylastpledgeid(String mylastpledgeid) {
         this.mylastpledgeid = mylastpledgeid;
     }
 
-    public int getMylastpledgeamount() {
-        return mylastpledgeamount;
-    }
 
-    public void setMylastpledgeamount(int mylastpledgeamount) {
-        this.mylastpledgeamount = mylastpledgeamount;
-    }
 
 }

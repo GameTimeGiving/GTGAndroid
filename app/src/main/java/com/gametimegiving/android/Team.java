@@ -22,16 +22,18 @@ public class Team implements Parcelable {
     private String teamname;
     private String mascot;
     private Charity charity;
+    private String logo;
 
     public Team() {
 
 
     }
 
-    public Team(String teamname, String mascot, Charity charity) {
+    public Team(String teamname, String mascot, Charity charity, String logo) {
         this.teamname = teamname;
         this.mascot = mascot;
         this.charity = charity;
+        this.logo = logo;
 
     }
 
@@ -66,6 +68,14 @@ public class Team implements Parcelable {
 
     public void setMascot(String mascot) {
         this.mascot = mascot;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 
     @Override
