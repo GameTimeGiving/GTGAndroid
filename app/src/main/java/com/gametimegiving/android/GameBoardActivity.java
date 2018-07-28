@@ -9,10 +9,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.constraint.Group;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
 import android.util.LruCache;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -106,12 +109,15 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
     private LruCache<Integer, Bitmap> imageMemCache;
     private AsyncHttpClient client = new AsyncHttpClient();
     private double TransactionAmt = 0;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
     protected void onCreate(Bundle savedInstanceState) {
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         super.onCreate(savedInstanceState);
+
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
             // already signed in
@@ -136,6 +142,12 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         //TODO:(2) As a user I can pick my team. Either I follow the team already or I can pick one to follow then.
         mPlayer.setMyteam("away");
         setContentView(R.layout.gameboard);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         tvGameNotStarted = findViewById(R.id.gamenotstarted);
         //Find and set all the textviews on the view
         tv_HomeTeamName = findViewById(R.id.HomeTeamName);
@@ -182,6 +194,14 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         context = this;
         showdialog();
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void GetAGame() {
