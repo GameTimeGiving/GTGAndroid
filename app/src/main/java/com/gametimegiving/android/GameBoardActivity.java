@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
 import android.util.LruCache;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -26,9 +27,7 @@ import android.widget.TextView;
 import com.braintreepayments.api.dropin.DropInActivity;
 import com.braintreepayments.api.dropin.DropInRequest;
 import com.braintreepayments.api.dropin.DropInResult;
-import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -197,11 +196,39 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.navigationdrawermenu, menu);
+        return true;
+    }
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
+        int id = item.getItemId();
+
+        if (id == R.id.nav_gameboard) {
+            Intent intent = new Intent(this, GameBoardActivity.class);
+            this.startActivity(intent);
+            return true;
+        }
+
+        if (id == R.id.nav_charities) {
+            Intent intent = new Intent(this, CharitySelection.class);
+            this.startActivity(intent);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        // call super.onBackPressed();  at last.
+        Intent intent = new Intent(this, GameBoardActivity.class);
+        startActivity(intent);
+        super.onBackPressed();
     }
 
     public void GetAGame() {
@@ -267,12 +294,18 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         String awayTeamLogo = mGame.getAwayteam().getLogo();
         StorageReference homeTeamLogoReference = storage.getReferenceFromUrl(homeTeamLogo);
         StorageReference awayTeamLogoReference = storage.getReferenceFromUrl(awayTeamLogo);
-        Glide.with(this /* context */)
-                .using(new FirebaseImageLoader())
+//        Glide.with(this /* context */)
+//                .using(new FirebaseImageLoader())
+//                .load(homeTeamLogoReference)
+//                .into(ivHomeTeamLogo);
+//        Glide.with(this /* context */)
+//                .using(new FirebaseImageLoader())
+//                .load(awayTeamLogoReference)
+//                .into(ivAwayTeamLogo);
+        GlideApp.with(this /* context */)
                 .load(homeTeamLogoReference)
                 .into(ivHomeTeamLogo);
-        Glide.with(this /* context */)
-                .using(new FirebaseImageLoader())
+        GlideApp.with(this /* context */)
                 .load(awayTeamLogoReference)
                 .into(ivAwayTeamLogo);
     }
@@ -423,7 +456,6 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference pledgeRef) {
-                        Log.d(TAG, String.format(""));
                         mPlayer.setMylastpledgeid(pledgeRef.getId());
                         mMyLastPledge = amount;
                         if (amount > 0) {
@@ -446,7 +478,7 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         int awayteampledgetotal = utilities.RemoveCurrency(tv_AwayTeamPledgeTotals.getText().toString());
         int playerpledgetotal = utilities.RemoveCurrency(tv_MyTotalPledgeTotals.getText().toString());
 
-        if (myTeam == "home") {
+        if (myTeam.equals("home")) {
             tv_HomeTeamPledgeTotals.setText(utilities.FormatCurrency(hometeampledgetotal + pledgeAmount));
         } else {
             tv_AwayTeamPledgeTotals.setText(utilities.FormatCurrency(awayteampledgetotal + pledgeAmount));
@@ -486,7 +518,6 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
     @Override
     public void onClick(View v) {
         int btnClicked = v.getId();
-        if (v == null) btnClicked = 0;
         switch (btnClicked) {
             case R.id.PledgeButton1:
                 addPledges(1);

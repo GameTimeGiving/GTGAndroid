@@ -1,35 +1,35 @@
 package com.gametimegiving.android;
 
-import android.graphics.Bitmap;
-
-import java.util.List;
-
 public class Charity {
-    List<Charity> listOfCharities;
-    private int CharityId;
-    private String CharityName;
+    private String Name;
     private String Detail;
     private String Mission;
     private String Purpose;
     private String ContactEmail;
     private String ContactPhone;
-    private String Logo;
-    private Bitmap bitmap;
+    private String logo;
 
-    public int getCharityId() {
-        return CharityId;
+
+    public Charity() {
     }
 
-    public void setCharityId(int charityId) {
-        this.CharityId = charityId;
+    public Charity(String Name, String Detail, String Mission, String Purpose, String ContactEmail,
+                   String ContactPhone, String logo) {
+        this.Name = Name;
+        this.Detail = Detail;
+        this.Mission = Mission;
+        this.Purpose = Purpose;
+        this.ContactEmail = ContactEmail;
+        this.ContactPhone = ContactPhone;
+        this.logo = logo;
     }
 
-    public String getCharityName() {
-        return CharityName;
+    public String getName() {
+        return Name;
     }
 
-    public void setCharityName(String teamName) {
-        this.CharityName = teamName;
+    public void setName(String Name) {
+        this.Name = Name;
     }
 
 
@@ -74,18 +74,11 @@ public class Charity {
     }
 
     public String getLogo() {
-        return Logo;
+        return logo;
     }
 
     public void setLogo(String logo) {
-        Logo = logo;
+        this.logo = logo;
     }
 
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
-    }
 }

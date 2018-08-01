@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_width="fill_parent"
+        android:layout_height="220dp"
+        android:layout_marginBottom="8dp"
+        android:elevation="100dp"
+        card_view:cardCornerRadius="8dp">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="4dp"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/tvhometeamname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:textSize="18sp"
+                card_view:layout_constraintBottom_toTopOf="@+id/ivhometeamlogo"
+                card_view:layout_constraintEnd_toEndOf="@+id/ivhometeamlogo"
+                card_view:layout_constraintStart_toStartOf="@+id/ivhometeamlogo"
+                card_view:layout_constraintTop_toTopOf="parent"
+                card_view:layout_constraintVertical_bias="0.533"
+                tools:text="Richwood"/>
+
+            <TextView
+                android:id="@+id/tvhometeammascot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="26dp"
+                android:layout_marginStart="26dp"
+                android:textSize="18sp"
+                card_view:layout_constraintStart_toStartOf="@+id/ivhometeamlogo"
+                card_view:layout_constraintTop_toBottomOf="@+id/ivhometeamlogo"
+                tools:text="Rams"/>
+
+            <TextView
+                android:id="@+id/tvawayteamname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:textSize="18sp"
+                card_view:layout_constraintBottom_toTopOf="@+id/ivawayteamlogo"
+                card_view:layout_constraintEnd_toEndOf="@+id/ivawayteamlogo"
+                card_view:layout_constraintStart_toStartOf="@+id/ivawayteamlogo"
+                card_view:layout_constraintTop_toTopOf="parent"
+                tools:text="Wossman"/>
+
+            <TextView
+                android:id="@+id/tvawayteammascot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:layout_marginStart="10dp"
+                android:textSize="18sp"
+                card_view:layout_constraintBottom_toBottomOf="@+id/btnsavegame"
+                card_view:layout_constraintStart_toStartOf="@+id/ivawayteamlogo"
+                tools:text="Wildcats"/>
+
+            <ImageView
+                android:id="@+id/ivhometeamlogo"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginBottom="56dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="15dp"
+                android:contentDescription="@string/placeholder"
+                app:srcCompat="@drawable/bt_ic_android_pay"
+                card_view:layout_constraintBottom_toBottomOf="parent"
+                card_view:layout_constraintEnd_toStartOf="@+id/versus"
+                card_view:layout_constraintHorizontal_bias="0.2"
+                card_view:layout_constraintStart_toStartOf="parent"
+                card_view:layout_constraintTop_toBottomOf="@+id/tvhometeamname"/>
+
+            <ImageView
+                android:id="@+id/ivawayteamlogo"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginBottom="93dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginLeft="37dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginStart="37dp"
+                android:layout_marginTop="4dp"
+                android:contentDescription="@string/placeholder"
+                app:srcCompat="@drawable/bt_ic_android_pay"
+                card_view:layout_constraintBottom_toBottomOf="@+id/versus"
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:layout_constraintStart_toEndOf="@+id/versus"
+                card_view:layout_constraintTop_toTopOf="@+id/versus"
+                card_view:layout_constraintVertical_bias="0.377"/>
+
+            <Button
+                android:id="@+id/btnsavegame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="29dp"
+                android:text="Follow"
+                card_view:layout_constraintBottom_toBottomOf="parent"
+                card_view:layout_constraintEnd_toStartOf="@+id/ivawayteamlogo"
+                card_view:layout_constraintStart_toEndOf="@+id/ivhometeamlogo"
+                card_view:layout_constraintTop_toBottomOf="@+id/versus"/>
+
+            <ImageView
+                android:id="@+id/versus"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="16dp"
+                app:srcCompat="@drawable/versus"
+                card_view:layout_constraintBottom_toBottomOf="@+id/ivhometeamlogo"
+                card_view:layout_constraintEnd_toStartOf="@+id/ivawayteamlogo"
+                card_view:layout_constraintStart_toEndOf="@+id/ivhometeamlogo"
+                card_view:layout_constraintTop_toTopOf="@+id/ivhometeamlogo"
+                card_view:layout_constraintVertical_bias="0.506"
+                />
+        </android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>
+</LinearLayout>

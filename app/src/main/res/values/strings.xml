@@ -21,5 +21,10 @@
     <string name="mystats">My Stats</string>
     <string name="profile">My Profile</string>
     <string name="charities">View Charities</string>
+    <string name="testparagraph1">We tackle complex social problems by surrounding North Texans with 200+ local programs in the areas of Education, Income, and Health – the essential components of a thriving community. Instead of just addressing one issue, like hunger or homelessness, we treat 360 degrees of need.</string>
+    <string name="placeholder">placeholder</string>
+    <string name="defaultcharitylogo">gs://gametimegiving-1b528.appspot.com/defaultcharity.png</string>
+    <string name="moredetail">More...</string>
+    <string name="savecharity">Give</string>
 
 </resources>
