@@ -25,6 +25,10 @@
     <string name="placeholder">placeholder</string>
     <string name="defaultcharitylogo">gs://gametimegiving-1b528.appspot.com/defaultcharity.png</string>
     <string name="moredetail">More...</string>
-    <string name="savecharity">Give</string>
+    <string name="savecharity">Follow</string>
+    <string name="navbargametext">View Games</string>
+    <string name="action_signout">Sign Out</string>
+    <string name="followtext">FOLLOW</string>
+    <string name="unfollowtext">UNFOLLOW</string>
 
 </resources>

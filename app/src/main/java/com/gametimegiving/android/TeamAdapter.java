@@ -43,6 +43,11 @@ public class TeamAdapter extends RecyclerView.Adapter<TeamAdapter.TeamViewHolder
         holder.btnsave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (holder.btnsave.getText() == mCtx.getString(R.string.followtext)) {
+                    holder.btnsave.setText(R.string.unfollowtext);
+                } else {
+                    holder.btnsave.setText(R.string.followtext);
+                }
                 Toast.makeText(mCtx, "Saving this team for you", Toast.LENGTH_SHORT).show();
 
             }

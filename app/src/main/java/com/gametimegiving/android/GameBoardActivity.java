@@ -4,30 +4,27 @@ package com.gametimegiving.android;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.constraint.Group;
+import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
-import android.util.LruCache;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.braintreepayments.api.dropin.DropInActivity;
 import com.braintreepayments.api.dropin.DropInRequest;
 import com.braintreepayments.api.dropin.DropInResult;
-import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,7 +42,6 @@ import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -57,7 +53,7 @@ import cz.msebera.android.httpclient.Header;
 
 public class GameBoardActivity extends AppCompatActivity implements View.OnClickListener {
     private final static int SUBMIT_PAYMENT_REQUEST_CODE = 100;
-    private static final int RC_SIGN_IN = 777;
+
     final public FirebaseFirestore db = FirebaseFirestore.getInstance();
     final int MaxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
     final int cacheSize = MaxMemory / 8;
@@ -105,48 +101,24 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
             tv_GamePeriod,
             tv_PreferredCharityNotice,
             tvGameNotStarted;
-    private LruCache<Integer, Bitmap> imageMemCache;
     private AsyncHttpClient client = new AsyncHttpClient();
     private double TransactionAmt = 0;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
+    private Context mContext;
     protected void onCreate(Bundle savedInstanceState) {
-
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         super.onCreate(savedInstanceState);
-
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() != null) {
-            // already signed in
-        } else {
-            startActivityForResult(
-                    AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setAvailableProviders(Arrays.asList(
-                                    new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                    new AuthUI.IdpConfig.FacebookBuilder().build(),
-                                    new AuthUI.IdpConfig.TwitterBuilder().build(),
-                                    new AuthUI.IdpConfig.EmailBuilder().build(),
-                                    new AuthUI.IdpConfig.PhoneBuilder().build()))
-                            .build(),
-                    RC_SIGN_IN);
-        }
-
-        String userId = auth.getUid();
+        Bundle bundle = getIntent().getExtras();
+        String userId = bundle.getString("user");
+        String gameId = bundle.getString("game");
         mPlayer.setPlayer(userId);
         //TODO:(1)As a User I can pick a game and that game will be pulled up on the game board. Shared preeferences maybe?
-        mGame.setGameid("suYroi6ZuratHkBDuyF7");
+        mGame.setGameid(gameId);
+        Log.d(TAG, String.format("Game ID set:%s", gameId));
         //TODO:(2) As a user I can pick my team. Either I follow the team already or I can pick one to follow then.
         mPlayer.setMyteam("away");
         setContentView(R.layout.gameboard);
-        mDrawerLayout = findViewById(R.id.drawer_layout);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.addDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        SetNavDrawer();
         tvGameNotStarted = findViewById(R.id.gamenotstarted);
         //Find and set all the textviews on the view
         tv_HomeTeamName = findViewById(R.id.HomeTeamName);
@@ -188,17 +160,63 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
             }
 
         }
-        imageMemCache = new LruCache<>(cacheSize);
         Integer ag = utilities.ReadSharedPref("activegame", this);
         context = this;
         showdialog();
 
     }
 
+    private void SetNavDrawer() {
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        mContext = this;
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        // set item as selected to persist highlight
+                        menuItem.setChecked(true);
+                        // close drawer when item is tapped
+                        mDrawerLayout.closeDrawers();
+                        int id = menuItem.getItemId();
+                        Intent intent = null;
+                        switch (id) {
+                            case R.id.nav_gameboard:
+                                intent = new Intent(mContext, GameBoardActivity.class);
+                                //    mContext.startActivity(intent);
+                                break;
+                            case R.id.nav_charities:
+                                intent = new Intent(mContext, CharitySelection.class);
+                                //      mContext.startActivity(intent);
+                                break;
+                            case R.id.nav_games:
+                                intent = new Intent(mContext, GameSelection.class);
+                                //        mContext.startActivity(intent);
+                                break;
+                            case R.id.nav_teams:
+                                intent = new Intent(mContext, TeamSelection.class);
+                                break;
+                            case R.id.nav_profile:
+                                intent = new Intent(mContext, Profile.class);
+                                break;
+
+                        }
+                        // Add code here to update the UI based on the item selected
+                        // For example, swap UI fragments here
+                        mContext.startActivity(intent);
+                        return true;
+                    }
+                });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.navigationdrawermenu, menu);
+        getMenuInflater().inflate(R.menu.mainmenu, menu);
         return true;
     }
     @Override
@@ -207,55 +225,57 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
             return true;
         }
         int id = item.getItemId();
+        switch (id) {
+            case R.id.action_settings:
+                Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.action_signout:
+                FirebaseAuth.getInstance().signOut();
+                this.finish();
+                break;
 
-        if (id == R.id.nav_gameboard) {
-            Intent intent = new Intent(this, GameBoardActivity.class);
-            this.startActivity(intent);
-            return true;
-        }
-
-        if (id == R.id.nav_charities) {
-            Intent intent = new Intent(this, CharitySelection.class);
-            this.startActivity(intent);
-            return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
 
-    @Override
-    public void onBackPressed() {
-        // call super.onBackPressed();  at last.
-        Intent intent = new Intent(this, GameBoardActivity.class);
-        startActivity(intent);
-        super.onBackPressed();
-    }
+//    @Override
+//    public void onBackPressed() {
+//        // call super.onBackPressed();  at last.
+//        Intent intent = new Intent(this, GameBoardActivity.class);
+//        startActivity(intent);
+//        super.onBackPressed();
+//    }
 
     public void GetAGame() {
-        DocumentReference gameRef = db.collection("games").document(mGame.getGameid());
-        gameRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot snapshot,
-                                @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "Listen failed.", e);
-                    return;
-                }
+        if (mGame.getGameid() != null) {
+            DocumentReference gameRef = db.collection("games").document(mGame.getGameid());
+            gameRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                    @Nullable FirebaseFirestoreException e) {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
+                    }
 
-                if (snapshot != null && snapshot.exists()) {
-                    Log.d(TAG, "Current data: " + snapshot.getData());
-                    mGame = snapshot.toObject(Game.class);
-                    mGame.setGameid(gameRef.getId());
-                    Log.d(TAG, String.format("GameData - Player Pledge: %s",
-                            Integer.toString(mGame.getPlayer().getPledgetotal())));
-                    GetTeamLogos();
-                    SetGameBoardMode(mGame);
+                    if (snapshot != null && snapshot.exists()) {
+                        Log.d(TAG, "Current data: " + snapshot.getData());
+                        mGame = snapshot.toObject(Game.class);
+                        mGame.setGameid(gameRef.getId());
+                        Log.d(TAG, String.format("GameData - Player Pledge: %s",
+                                Integer.toString(mGame.getPlayer().getPledgetotal())));
+                        GetTeamLogos();
+                        SetGameBoardMode(mGame);
 
-                } else {
-                    Log.d(TAG, "Current data: null");
+                    } else {
+                        Log.d(TAG, "Current data: null");
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            Toast.makeText(this, "Oops! There is no Game to find. ", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void GetClientToken() {
@@ -294,14 +314,7 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         String awayTeamLogo = mGame.getAwayteam().getLogo();
         StorageReference homeTeamLogoReference = storage.getReferenceFromUrl(homeTeamLogo);
         StorageReference awayTeamLogoReference = storage.getReferenceFromUrl(awayTeamLogo);
-//        Glide.with(this /* context */)
-//                .using(new FirebaseImageLoader())
-//                .load(homeTeamLogoReference)
-//                .into(ivHomeTeamLogo);
-//        Glide.with(this /* context */)
-//                .using(new FirebaseImageLoader())
-//                .load(awayTeamLogoReference)
-//                .into(ivAwayTeamLogo);
+
         GlideApp.with(this /* context */)
                 .load(homeTeamLogoReference)
                 .into(ivHomeTeamLogo);
@@ -478,7 +491,7 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         int awayteampledgetotal = utilities.RemoveCurrency(tv_AwayTeamPledgeTotals.getText().toString());
         int playerpledgetotal = utilities.RemoveCurrency(tv_MyTotalPledgeTotals.getText().toString());
 
-        if (myTeam.equals("home")) {
+        if (myTeam == "home") {
             tv_HomeTeamPledgeTotals.setText(utilities.FormatCurrency(hometeampledgetotal + pledgeAmount));
         } else {
             tv_AwayTeamPledgeTotals.setText(utilities.FormatCurrency(awayteampledgetotal + pledgeAmount));

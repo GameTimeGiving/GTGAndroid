@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-      android:background="#FFFFFF">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_profile"
@@ -14,6 +13,14 @@
             android:id="@+id/nav_charities"
             android:icon="@drawable/usericon"
             android:title="@string/charities"/>
+        <item
+            android:id="@+id/nav_teams"
+            android:icon="@drawable/iconteam"
+            android:title="@string/teams"/>
+        <item
+            android:id="@+id/nav_games"
+            android:icon="@drawable/iconteam"
+            android:title="@string/navbargametext"/>
         <!--<item-->
         <!--android:id="@+id/nav_stats"-->
         <!--android:icon="@drawable/iconstats"-->
@@ -22,9 +29,6 @@
         <!--android:id="@+id/nav_teamstats"-->
         <!--android:icon="@drawable/usericon"-->
         <!--android:title="@string/teamstats"/>-->
-        <!--<item-->
-        <!--android:id="@+id/nav_teams"-->
-        <!--android:icon="@drawable/iconteam"-->
-        <!--android:title="@string/teams"/>-->
+
     </group>
 </menu>

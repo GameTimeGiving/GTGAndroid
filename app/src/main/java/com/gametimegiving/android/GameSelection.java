@@ -1,7 +1,9 @@
 package com.gametimegiving.android;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -10,7 +12,9 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -26,11 +30,12 @@ public class GameSelection extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
-
+    private Context mContext = this;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_selection);
+        SetNavDrawer();
         GetGame("ALL");
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -43,37 +48,26 @@ public class GameSelection extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.navigationdrawermenu, menu);
+        getMenuInflater().inflate(R.menu.mainmenu, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
         int id = item.getItemId();
+        switch (id) {
+            case R.id.action_settings:
+                Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.action_signout:
+                FirebaseAuth.getInstance().signOut();
+                this.finish();
+                break;
 
-        if (id == R.id.nav_gameboard) {
-            Intent intent = new Intent(this, GameBoardActivity.class);
-            this.startActivity(intent);
-            return true;
-        }
-
-        if (id == R.id.nav_charities) {
-            Intent intent = new Intent(this, GameSelection.class);
-            this.startActivity(intent);
-            return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        // call super.onBackPressed();  at last.
-        Intent intent = new Intent(this, GameSelection.class);
-        startActivity(intent);
-        super.onBackPressed();
     }
 
     private void SetAdapter() {
@@ -103,5 +97,48 @@ public class GameSelection extends AppCompatActivity {
                     }
                 });
 
+    }
+
+    private void SetNavDrawer() {
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        // set item as selected to persist highlight
+                        menuItem.setChecked(true);
+                        // close drawer when item is tapped
+                        mDrawerLayout.closeDrawers();
+                        int id = menuItem.getItemId();
+                        Intent intent = null;
+                        switch (id) {
+                            case R.id.nav_gameboard:
+                                intent = new Intent(mContext, GameBoardActivity.class);
+                                break;
+                            case R.id.nav_charities:
+                                intent = new Intent(mContext, CharitySelection.class);
+                                break;
+                            case R.id.nav_games:
+                                intent = new Intent(mContext, GameSelection.class);
+                                break;
+                            case R.id.nav_teams:
+                                intent = new Intent(mContext, TeamSelection.class);
+                                break;
+                            case R.id.nav_profile:
+                                intent = new Intent(mContext, Profile.class);
+                                break;
+
+                        }
+                        // Add code here to update the UI based on the item selected
+                        // For example, swap UI fragments here
+                        mContext.startActivity(intent);
+                        return true;
+                    }
+                });
     }
 }

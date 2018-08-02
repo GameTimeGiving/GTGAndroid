@@ -18,14 +18,12 @@ public class Pledge {
 
     public Pledge() {
 
-
     }
 
     public Pledge(String gameid, String teamid, String charityid) {
         this.gameid = gameid;
         this.teamid = teamid;
         this.charityid = charityid;
-
     }
 
     public Pledge(Activity context) {

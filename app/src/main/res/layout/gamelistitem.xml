@@ -119,7 +119,7 @@
                 android:layout_marginRight="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="29dp"
-                android:text="Follow"
+                android:text="@string/followtext"
                 card_view:layout_constraintBottom_toBottomOf="parent"
                 card_view:layout_constraintEnd_toStartOf="@+id/ivawayteamlogo"
                 card_view:layout_constraintStart_toEndOf="@+id/ivhometeamlogo"

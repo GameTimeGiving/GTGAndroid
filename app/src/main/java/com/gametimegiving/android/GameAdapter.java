@@ -42,9 +42,14 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
         holder.tvHomeTeamMascot.setText(game.getHometeam().getMascot());
         holder.tvAwayTeamName.setText(game.getAwayteam().getTeamname());
         holder.tvAwayTeamMascot.setText(game.getAwayteam().getMascot());
-        holder.btnsave.setOnClickListener(new View.OnClickListener() {
+        holder.btnsavegame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (holder.btnsavegame.getText() == mCtx.getString(R.string.followtext)) {
+                    holder.btnsavegame.setText(R.string.unfollowtext);
+                } else {
+                    holder.btnsavegame.setText(R.string.followtext);
+                }
                 Toast.makeText(mCtx, "Saving this Game for you", Toast.LENGTH_SHORT).show();
 
             }
@@ -78,12 +83,12 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
     class GameViewHolder extends RecyclerView.ViewHolder {
         ImageView ivHomeTeamLogo, ivAwayTeamLogo;
         TextView tvHomeTeamName, tvAwayTeamName, tvHomeTeamMascot, tvAwayTeamMascot;
-        Button btndetail, btnsave;
+        Button btndetail, btnsavegame;
 
         private GameViewHolder(View itemView) {
             super(itemView);
             btndetail = itemView.findViewById(R.id.btnmoredetail);
-            btnsave = itemView.findViewById(R.id.btnsavegame);
+            btnsavegame = itemView.findViewById(R.id.btnsavegame);
             ivHomeTeamLogo = itemView.findViewById(R.id.ivhometeamlogo);
             ivAwayTeamLogo = itemView.findViewById(R.id.ivawayteamlogo);
             tvHomeTeamName = itemView.findViewById(R.id.tvhometeamname);
