@@ -231,7 +231,6 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
                 break;
             case R.id.action_signout:
                 FirebaseAuth.getInstance().signOut();
-                this.finish();
                 break;
 
         }

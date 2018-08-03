@@ -63,7 +63,6 @@ public class GameSelection extends AppCompatActivity {
                 break;
             case R.id.action_signout:
                 FirebaseAuth.getInstance().signOut();
-                this.finish();
                 break;
 
         }
