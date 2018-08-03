@@ -149,6 +149,8 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         mAwayLogo = findViewById(R.id.awayteamlogo);
         //Find the groups on the view
         pledgeButtons = findViewById(R.id.pledgeButtons);
+
+
         GetAGame();
         if (getIntent().getExtras() != null) {
             try {
@@ -227,10 +229,14 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         int id = item.getItemId();
         switch (id) {
             case R.id.action_settings:
-                Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
+                Utilities.ShowVersion(this);
                 break;
             case R.id.action_signout:
                 FirebaseAuth.getInstance().signOut();
+                Intent startMain = new Intent(Intent.ACTION_MAIN);
+                startMain.addCategory(Intent.CATEGORY_HOME);
+                startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(startMain);
                 break;
 
         }

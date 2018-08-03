@@ -3,6 +3,7 @@ package com.gametimegiving.android;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.widget.Toast;
 
 import java.text.NumberFormat;
@@ -82,5 +83,16 @@ public class Utilities {
         final SharedPreferences sharedpreferences = activity.getSharedPreferences(Constant.MyPREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.clear().commit();
+    }
+
+    public static void ShowVersion(Context ctx) {
+        String versionName = "N/A";
+        try {
+            versionName = ctx.getPackageManager()
+                    .getPackageInfo(ctx.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        Toast.makeText(ctx, String.format("Version:%s", versionName), Toast.LENGTH_SHORT).show();
     }
 }
