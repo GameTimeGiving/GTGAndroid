@@ -314,13 +314,14 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         String awayTeamLogo = mGame.getAwayteam().getLogo();
         StorageReference homeTeamLogoReference = storage.getReferenceFromUrl(homeTeamLogo);
         StorageReference awayTeamLogoReference = storage.getReferenceFromUrl(awayTeamLogo);
-
+        if (!this.isFinishing()) {
         GlideApp.with(this /* context */)
                 .load(homeTeamLogoReference)
                 .into(ivHomeTeamLogo);
         GlideApp.with(this /* context */)
                 .load(awayTeamLogoReference)
                 .into(ivAwayTeamLogo);
+        }
     }
 
     private void GetPersonalPledge() {
@@ -515,7 +516,7 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         //Check if this is my first time in
         bFirstTimeIn = utilities.ReadBoolSharedPref(Constant.ISFIRSTTIMEIN, this);
         if (bFirstTimeIn) {
-            String teamName = "THe Team"; //mGame.getMyteam().getTeamName();
+            String teamName = "The Team"; //mGame.getMyteam().getTeamName();
             String charityName = "The Charity";//mGame.getMyteam().getPreferredCharity().getCharityName();
             String preferredCharityMessage =
                     String.format("NOTICE: Your team, %s, has chosen to support %s as a Preferred Charity. Your pledges will be split equally between the" +

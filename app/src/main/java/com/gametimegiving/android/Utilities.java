@@ -67,12 +67,15 @@ public class Utilities {
     public int RemoveCurrency(String dollars) {
         NumberFormat format = NumberFormat.getCurrencyInstance();
         Number number = 0;
+        int finalnumber = 0;
         try {
             number = format.parse(dollars);
+            finalnumber = (int) (long) number;
         } catch (ParseException e) {
-            number = 0;
+            finalnumber = 0;
         }
-        return (int) (long) number;
+
+        return finalnumber;
     }
 
     public void ClearSharedPrefs(Activity activity) {
