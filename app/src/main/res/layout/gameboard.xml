@@ -284,6 +284,7 @@
             android:layout_marginStart="4dp"
             android:textColor="#fff"
             android:textSize="18sp"
+            android:text="$0.00"
             app:layout_constraintBottom_toBottomOf="@+id/myPledge"
             app:layout_constraintStart_toStartOf="@+id/GLVerticalCenter"
             app:layout_constraintTop_toTopOf="@+id/myPledge"
@@ -476,7 +477,6 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/com_facebook_blue"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/navigationdrawermenu"/>

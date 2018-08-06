@@ -24,5 +24,8 @@ public class Constant {
     public static final String GAMEINPROGRESS = "inp";
     public static final String GAMEOVER = "ovr";
     public static final String NEEDSONBOARDING = "needsonboarding";
+    public static final int FIRSTPLEDGEAMT = 1;
+    public static final int SECONDPLEDGEAMT = 3;
+    public static final int THIRDPLEDGEAMT = 5;
 
 }

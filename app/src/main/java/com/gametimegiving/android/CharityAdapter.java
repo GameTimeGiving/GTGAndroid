@@ -1,6 +1,8 @@
 package com.gametimegiving.android;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -39,6 +41,7 @@ public class CharityAdapter extends RecyclerView.Adapter<CharityAdapter.CharityV
     @Override
     public void onBindViewHolder(@NonNull CharityViewHolder holder, int position) {
         Charity charity = mCharityList.get(position);
+        String charityid = charity.getId();
         holder.tvCharityName.setText(charity.getName());
         holder.btnsave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,7 +60,13 @@ public class CharityAdapter extends RecyclerView.Adapter<CharityAdapter.CharityV
         holder.btndetail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(mCtx, "Taking your to the charity details", Toast.LENGTH_SHORT).show();
+                Bundle bundle = new Bundle();
+                bundle.putString("charityid", charityid);
+                Intent intent = new Intent(v.getContext(), CharityDetail.class);
+                intent.putExtras(bundle);
+                v.getContext().startActivity(intent);
+
+
             }
         });
         // holder.tvCharityPurpose.setText(charity.getPurpose());

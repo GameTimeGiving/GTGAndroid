@@ -1,10 +1,11 @@
 package com.gametimegiving.android;
 
-import android.content.Context;
-
 public class Player {
     private static final String TAG = "Player";
     public Utilities utilities = new Utilities();
+
+
+    private String id;
     private String user;
     private String myteam;
     private String game;
@@ -18,25 +19,20 @@ public class Player {
 
     }
 
-    Player(String game, int pledgetotal, String user) {
+    Player(String game, int pledgetotal, String user, String id) {
         this.game = game;
         this.pledgetotal = pledgetotal;
         this.user = user;
+        this.id = id;
     }
 
 
-    public static boolean isRegisteredPlayer(String userName, String pwd, Context context) {
-        Boolean registeredPlayer = false;
-        String method = "login";
-        return registeredPlayer;
+    public String getId() {
+        return id;
     }
 
-    public String getPlayer() {
-        return user;
-    }
-
-    public void setPlayer(String user) {
-        this.user = user;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public int getPledgetotal() {

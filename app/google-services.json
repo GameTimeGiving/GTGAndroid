@@ -23,6 +23,22 @@
           }
         },
         {
+          "client_id": "981905831875-bi6enev7goei70af2hqk1be00j5g88ui.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gametimegiving.android",
+            "certificate_hash": "3d6b0aa8de3228de657b678f77086a20271e099e"
+          }
+        },
+        {
+          "client_id": "981905831875-1fcs1p6h676lr0gfgoevbspl0s5citko.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gametimegiving.android",
+            "certificate_hash": "9123361f435bcc4a69e620b1bc65274a6e695dcf"
+          }
+        },
+        {
           "client_id": "981905831875-vvucgikafn0o9cjgfl6eqmv5f79gg5j7.apps.googleusercontent.com",
           "client_type": 3
         }

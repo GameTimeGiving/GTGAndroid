@@ -7,19 +7,19 @@
             android:title="@string/profile"/>
         <item
             android:id="@+id/nav_gameboard"
-            android:icon="@drawable/usericon"
+            android:icon="@drawable/gameboardicon"
             android:title="@string/game_board_title"/>
         <item
             android:id="@+id/nav_charities"
-            android:icon="@drawable/usericon"
+            android:icon="@drawable/charityicon"
             android:title="@string/charities"/>
         <item
             android:id="@+id/nav_teams"
-            android:icon="@drawable/iconteam"
+            android:icon="@drawable/teamicon"
             android:title="@string/teams"/>
         <item
             android:id="@+id/nav_games"
-            android:icon="@drawable/iconteam"
+            android:icon="@drawable/gamesicon"
             android:title="@string/navbargametext"/>
         <!--<item-->
         <!--android:id="@+id/nav_stats"-->

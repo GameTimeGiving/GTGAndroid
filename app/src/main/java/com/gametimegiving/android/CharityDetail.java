@@ -14,15 +14,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CharitySelection extends AppCompatActivity {
+public class CharityDetail extends AppCompatActivity {
     final public FirebaseFirestore db = FirebaseFirestore.getInstance();
-    final public String TAG = "CharitySelection";
+    final public String TAG = "CharityDetail";
     List<Charity> charityList;
     private RecyclerView mRecyclerView;
     private CharityAdapter mAdapter;
@@ -30,12 +30,16 @@ public class CharitySelection extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private Context mContext = this;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_charity_selection);
+        Bundle bundle = getIntent().getExtras();
+        String charityid = bundle.getString("charityid");
+        Log.d(TAG, String.format("Opening the detail for charity %s", charityid));
+        setContentView(R.layout.activity_charity_detail);
         SetNavDrawer();
-        GetCharity("ALL");
+        GetCharity(charityid);
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
@@ -50,6 +54,7 @@ public class CharitySelection extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.mainmenu, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
@@ -82,24 +87,24 @@ public class CharitySelection extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
     }
 
-    private void GetCharity(String all) {
+    private void GetCharity(String charityid) {
         // int gameId = 001;
         charityList = new ArrayList<Charity>();
-        db.collection("charity")
+        db.collection("charity").document(charityid)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Charity charity = document.toObject(Charity.class);
-                            charity.setId(document.getId());
-                            charityList.add(charity);
-                        }
-                        SetAdapter();
+                        DocumentSnapshot document = task.getResult();
+                        Charity charity = document.toObject(Charity.class);
+                        SetCharityDetail(charity);
                     } else {
                         Log.d(TAG, "Getting Charities is failing");
                     }
                 });
 
+    }
+
+    private void SetCharityDetail(Charity charity) {
     }
 
     private void SetNavDrawer() {
@@ -124,7 +129,7 @@ public class CharitySelection extends AppCompatActivity {
                                 intent = new Intent(mContext, GameBoardActivity.class);
                                 break;
                             case R.id.nav_charities:
-                                intent = new Intent(mContext, CharitySelection.class);
+                                intent = new Intent(mContext, CharityDetail.class);
                                 break;
                             case R.id.nav_games:
                                 intent = new Intent(mContext, GameSelection.class);
