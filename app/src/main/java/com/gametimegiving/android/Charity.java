@@ -2,16 +2,8 @@ package com.gametimegiving.android;
 
 public class Charity {
     private String id;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
     private String Name;
-    private String Detail;
+    private String detail;
     private String Mission;
     private String Purpose;
     private String ContactEmail;
@@ -23,16 +15,24 @@ public class Charity {
     public Charity() {
     }
 
-    public Charity(String Name, String Detail, String Mission, String Purpose, String ContactEmail,
+    public Charity(String Name, String detail, String Mission, String Purpose, String ContactEmail,
                    String ContactPhone, String logo, int totalamountraised) {
         this.Name = Name;
-        this.Detail = Detail;
+        this.detail = detail;
         this.Mission = Mission;
         this.Purpose = Purpose;
         this.ContactEmail = ContactEmail;
         this.ContactPhone = ContactPhone;
         this.logo = logo;
         this.TotalAmountRaised = totalamountraised;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public int getTotalAmountRaised() {
@@ -51,47 +51,6 @@ public class Charity {
         this.Name = Name;
     }
 
-
-    public String getDetail() {
-        return Detail;
-    }
-
-    public void setDetail(String detail) {
-        Detail = detail;
-    }
-
-    public String getMission() {
-        return Mission;
-    }
-
-    public void setMission(String mission) {
-        Mission = mission;
-    }
-
-    public String getPurpose() {
-        return Purpose;
-    }
-
-    public void setPurpose(String purpose) {
-        Purpose = purpose;
-    }
-
-    public String getContactEmail() {
-        return ContactEmail;
-    }
-
-    public void setContactEmail(String contactEmail) {
-        ContactEmail = contactEmail;
-    }
-
-    public String getContactPhone() {
-        return ContactPhone;
-    }
-
-    public void setContactPhone(String contactPhone) {
-        ContactPhone = contactPhone;
-    }
-
     public String getLogo() {
         return logo;
     }
@@ -100,4 +59,11 @@ public class Charity {
         this.logo = logo;
     }
 
+    public String getDetail() {
+        return detail;
+    }
+
+    public void setDetail(String detail) {
+        this.detail = detail;
+    }
 }

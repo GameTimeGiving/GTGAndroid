@@ -1,5 +1,6 @@
 package com.gametimegiving.android;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -13,8 +14,11 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -36,9 +40,10 @@ public class CharityDetail extends AppCompatActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private Context mContext = this;
     String charityid;
+    String lastviewedcharityid;
     ImageView ivCharity;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
-
+    Button btnSaveCharity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,6 +110,7 @@ public class CharityDetail extends AppCompatActivity {
                         DocumentSnapshot document = task.getResult();
                         Charity charity = document.toObject(Charity.class);
                         if (charity != null) {
+                            Log.d(TAG, String.format("The charity name is %s", charity.getName()));
                             SetCharityDetail(charity);
                         }
                     } else {
@@ -136,7 +142,15 @@ public class CharityDetail extends AppCompatActivity {
         GlideApp.with(mContext)
                 .load(charityLogoReference)
                 .into(ivCharity);
-
+        btnSaveCharity = findViewById(R.id.btnCharityDetailSave);
+        btnSaveCharity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Activity activity = (Activity) (v.getContext());
+                Toast.makeText(v.getContext(), String.format("Saving %s to your profile.", charity.getName()), Toast.LENGTH_SHORT).show();
+                Utilities.WriteSharedPref("SCharity1", charityid, activity, "s");
+            }
+        });
 
     }
 
@@ -160,7 +174,7 @@ public class CharityDetail extends AppCompatActivity {
                             intent = new Intent(mContext, GameBoardActivity.class);
                             break;
                         case R.id.nav_charities:
-                            intent = new Intent(mContext, CharityDetail.class);
+                            intent = new Intent(mContext, CharitySelection.class);
                             break;
                         case R.id.nav_games:
                             intent = new Intent(mContext, GameSelection.class);

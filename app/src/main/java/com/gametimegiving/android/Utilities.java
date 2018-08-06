@@ -95,7 +95,7 @@ public class Utilities {
         Toast.makeText(ctx, String.format("Version:%s", versionName), Toast.LENGTH_SHORT).show();
     }
 
-    public void WriteSharedPref(String key, String val, Activity activity, String type) {
+    public static void WriteSharedPref(String key, String val, Activity activity, String type) {
         SharedPreferences sharedPref = activity.getSharedPreferences(Constant.MyPREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         switch (type) {
