@@ -2,6 +2,7 @@ package com.gametimegiving.android;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -12,10 +13,14 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,12 +35,15 @@ public class CharityDetail extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private Context mContext = this;
+    String charityid;
+    ImageView ivCharity;
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = getIntent().getExtras();
-        String charityid = bundle.getString("charityid");
+        charityid = bundle.getString("charityid");
         Log.d(TAG, String.format("Opening the detail for charity %s", charityid));
         setContentView(R.layout.activity_charity_detail);
         SetNavDrawer();
@@ -96,7 +104,9 @@ public class CharityDetail extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         Charity charity = document.toObject(Charity.class);
-                        SetCharityDetail(charity);
+                        if (charity != null) {
+                            SetCharityDetail(charity);
+                        }
                     } else {
                         Log.d(TAG, "Getting Charities is failing");
                     }
@@ -105,6 +115,29 @@ public class CharityDetail extends AppCompatActivity {
     }
 
     private void SetCharityDetail(Charity charity) {
+        Typeface varsity_font = Typeface.createFromAsset(getApplicationContext().getAssets(), "fonts/varsity_regular.ttf");
+        TextView tvcharityname = findViewById(R.id.tvcharityname);
+        tvcharityname.setTypeface(varsity_font);
+        tvcharityname.setText(charity.getName());
+        TextView tvcharitydetails = findViewById(R.id.tvcharitydetails);
+        tvcharitydetails.setText(charity.getDetail());
+        TextView tvamountraised = findViewById(R.id.tvamountraised);
+        String totalAmountRaisedByCharity = Utilities.FormatCurrency(charity.getTotalAmountRaised());
+        tvamountraised.setText(String.format("Amount Raised via GTG; %s", totalAmountRaisedByCharity));
+        ivCharity = findViewById(R.id.charitylogo);
+        String charityLogo = charity.getLogo();
+        StorageReference charityLogoReference;
+        try {
+            charityLogoReference = storage.getReferenceFromUrl(charityLogo);
+        } catch (Exception ex) {
+            charityLogoReference = storage.getReferenceFromUrl(String.valueOf(R.string.defaultcharitylogo));
+
+        }
+        GlideApp.with(mContext)
+                .load(charityLogoReference)
+                .into(ivCharity);
+
+
     }
 
     private void SetNavDrawer() {
@@ -115,38 +148,35 @@ public class CharityDetail extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        // set item as selected to persist highlight
-                        menuItem.setChecked(true);
-                        // close drawer when item is tapped
-                        mDrawerLayout.closeDrawers();
-                        int id = menuItem.getItemId();
-                        Intent intent = null;
-                        switch (id) {
-                            case R.id.nav_gameboard:
-                                intent = new Intent(mContext, GameBoardActivity.class);
-                                break;
-                            case R.id.nav_charities:
-                                intent = new Intent(mContext, CharityDetail.class);
-                                break;
-                            case R.id.nav_games:
-                                intent = new Intent(mContext, GameSelection.class);
-                                break;
-                            case R.id.nav_teams:
-                                intent = new Intent(mContext, TeamSelection.class);
-                                break;
-                            case R.id.nav_profile:
-                                intent = new Intent(mContext, Profile.class);
-                                break;
+                menuItem -> {
+                    // set item as selected to persist highlight
+                    menuItem.setChecked(true);
+                    // close drawer when item is tapped
+                    mDrawerLayout.closeDrawers();
+                    int id = menuItem.getItemId();
+                    Intent intent = null;
+                    switch (id) {
+                        case R.id.nav_gameboard:
+                            intent = new Intent(mContext, GameBoardActivity.class);
+                            break;
+                        case R.id.nav_charities:
+                            intent = new Intent(mContext, CharityDetail.class);
+                            break;
+                        case R.id.nav_games:
+                            intent = new Intent(mContext, GameSelection.class);
+                            break;
+                        case R.id.nav_teams:
+                            intent = new Intent(mContext, TeamSelection.class);
+                            break;
+                        case R.id.nav_profile:
+                            intent = new Intent(mContext, Profile.class);
+                            break;
 
-                        }
-                        // Add code here to update the UI based on the item selected
-                        // For example, swap UI fragments here
-                        mContext.startActivity(intent);
-                        return true;
                     }
+                    // Add code here to update the UI based on the item selected
+                    // For example, swap UI fragments here
+                    mContext.startActivity(intent);
+                    return true;
                 });
     }
 }

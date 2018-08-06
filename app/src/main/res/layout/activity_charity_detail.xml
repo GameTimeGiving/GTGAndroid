@@ -16,7 +16,7 @@
         android:layout_height="match_parent">
 
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/btnCharityDetailSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
@@ -24,7 +24,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
-            android:text="Save"
+            android:text="@string/savecharity"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
@@ -39,7 +39,7 @@
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/button2"
+            app:layout_constraintBottom_toTopOf="@+id/btnCharityDetailSave"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/charitylogo">
@@ -50,7 +50,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/charitydetails"
+                    android:id="@+id/tvcharitydetails"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     tools:text="@string/loremIpsum"/>
@@ -66,11 +66,12 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/cd_logo_of_the_charity"
             app:layout_constraintBottom_toTopOf="@+id/scrollView2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/amountraised"
+            app:layout_constraintTop_toBottomOf="@+id/tvamountraised"
             app:srcCompat="@drawable/defaultcharity"/>
 
         <VideoView
@@ -86,11 +87,11 @@
             app:layout_constraintBottom_toTopOf="@+id/scrollView2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/amountraised"/>
+            app:layout_constraintTop_toBottomOf="@+id/tvamountraised"/>
 
 
         <TextView
-            android:id="@+id/charityname"
+            android:id="@+id/tvcharityname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
@@ -98,8 +99,11 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="8dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintBottom_toTopOf="@+id/amountraised"
+            android:layout_marginTop="8dp"
+            android:textAllCaps="true"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/tvamountraised"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -107,21 +111,20 @@
             tools:text="Dallas Furniture Bank"/>
 
         <TextView
-            android:id="@+id/amountraised"
+            android:id="@+id/tvamountraised"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="169dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="169dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="6dp"
-            android:text="TextView"
+            android:layout_marginTop="8dp"
+            android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/charityname"
+            app:layout_constraintTop_toBottomOf="@+id/tvcharityname"
             tools:text="Raised to-date via GTG $6,750"/>
-
     </android.support.constraint.ConstraintLayout>
 
     <android.support.design.widget.NavigationView

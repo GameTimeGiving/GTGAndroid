@@ -17,13 +17,14 @@ public class Charity {
     private String ContactEmail;
     private String ContactPhone;
     private String logo;
+    private int TotalAmountRaised;
 
 
     public Charity() {
     }
 
     public Charity(String Name, String Detail, String Mission, String Purpose, String ContactEmail,
-                   String ContactPhone, String logo) {
+                   String ContactPhone, String logo, int totalamountraised) {
         this.Name = Name;
         this.Detail = Detail;
         this.Mission = Mission;
@@ -31,6 +32,15 @@ public class Charity {
         this.ContactEmail = ContactEmail;
         this.ContactPhone = ContactPhone;
         this.logo = logo;
+        this.TotalAmountRaised = totalamountraised;
+    }
+
+    public int getTotalAmountRaised() {
+        return TotalAmountRaised;
+    }
+
+    public void setTotalAmountRaised(int totalAmountRaised) {
+        TotalAmountRaised = totalAmountRaised;
     }
 
     public String getName() {
