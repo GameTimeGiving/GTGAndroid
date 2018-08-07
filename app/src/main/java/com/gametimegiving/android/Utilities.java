@@ -33,10 +33,7 @@ public class Utilities {
 
     }
 
-    public String ReadSharedPref(String key, Activity activity, String type) {
-        SharedPreferences sharedPref = activity.getSharedPreferences(Constant.MyPREFERENCES, Context.MODE_PRIVATE);
-        return sharedPref.getString(key, "");
-    }
+
 
     public Integer ReadSharedPref(String key, Activity activity) {
         SharedPreferences sharedPref = activity.getSharedPreferences(Constant.MyPREFERENCES, Context.MODE_PRIVATE);
@@ -71,18 +68,13 @@ public class Utilities {
         TextView tvUserName = view.findViewById(R.id.tvusername);
         ImageView userProfileImage = view.findViewById(R.id.userprofileimage);
         tvUserName.setText(String.format("Logged In As: %s", username));
-        if (!photoUrl.isEmpty()) {
+        if (photoUrl != "") {
             GlideApp.with(context /* context */)
                     .load(photoUrl)
                     .into(userProfileImage);
         }
     }
 
-    public void ClearSharedPrefs(Activity activity) {
-        final SharedPreferences sharedpreferences = activity.getSharedPreferences(Constant.MyPREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.clear().commit();
-    }
 
     public static void ShowVersion(Context ctx) {
         String versionName = "N/A";
@@ -95,29 +87,7 @@ public class Utilities {
         Toast.makeText(ctx, String.format("Version:%s", versionName), Toast.LENGTH_SHORT).show();
     }
 
-    public static void WriteSharedPref(String key, String val, Activity activity, String type) {
-        SharedPreferences sharedPref = activity.getSharedPreferences(Constant.MyPREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        switch (type) {
-            case "s":
-                editor.putString(key, val);
-                break;
-            case "b":
-                boolean bVal = false;
-                if (val.equals("true")) {
-                    bVal = true;
-                }
-                editor.putBoolean(key, bVal);
-                break;
-            case "i":
-                Integer iVal = Integer.parseInt(val);
-                editor.putInt(key, iVal);
-                break;
 
-        }
-
-        editor.apply();
-    }
 
     public int RemoveCurrency(String dollars) {
         NumberFormat format = NumberFormat.getCurrencyInstance();
@@ -132,4 +102,6 @@ public class Utilities {
 
         return finalnumber;
     }
+
+
 }

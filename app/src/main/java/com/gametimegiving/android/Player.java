@@ -3,8 +3,6 @@ package com.gametimegiving.android;
 public class Player {
     private static final String TAG = "Player";
     public Utilities utilities = new Utilities();
-
-
     private String id;
     private String user;
     private String myteam;

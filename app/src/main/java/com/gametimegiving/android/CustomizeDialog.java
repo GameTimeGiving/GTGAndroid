@@ -13,7 +13,6 @@ class CustomizeDialog extends Dialog {
     private Context context;
 
     CustomizeDialog(Context context) {
-
         super(context, R.style.Theme_Dialog_Translucent);
         try {
             requestWindowFeature(Window.FEATURE_NO_TITLE);

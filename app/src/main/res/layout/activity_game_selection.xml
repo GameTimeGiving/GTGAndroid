@@ -16,8 +16,6 @@
         android:layout_height="match_parent"
         android:background="@drawable/background"
         tools:context=".CharitySelection">
-
-
         <android.support.v7.widget.RecyclerView
             android:id="@+id/listofgames"
             android:layout_width="0dp"
@@ -40,7 +38,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/com_facebook_blue"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/navigationdrawermenu"/>

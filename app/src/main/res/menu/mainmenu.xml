@@ -7,6 +7,16 @@
         android:title="@string/action_settings"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_demo"
+        android:orderInCategory="100"
+        android:title="@string/demo"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_reset"
+        android:orderInCategory="100"
+        android:title="@string/clearprefs"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_signout"
         android:orderInCategory="100"
         android:title="@string/action_signout"

@@ -2,20 +2,12 @@
 package com.gametimegiving.android;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.constraint.Group;
-import android.support.design.widget.NavigationView;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -27,7 +19,6 @@ import com.braintreepayments.api.dropin.DropInRequest;
 import com.braintreepayments.api.dropin.DropInResult;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -51,35 +42,19 @@ import javax.annotation.Nullable;
 
 import cz.msebera.android.httpclient.Header;
 
-public class GameBoardActivity extends AppCompatActivity implements View.OnClickListener {
+public class GameBoardActivity extends GTGBaseActivity implements View.OnClickListener {
     private final static int SUBMIT_PAYMENT_REQUEST_CODE = 100;
-
     final public FirebaseFirestore db = FirebaseFirestore.getInstance();
     final int MaxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-    final int cacheSize = MaxMemory / 8;
-    final Handler handler = new Handler();
     private final String TAG = getClass().getSimpleName();
-    private final Player player = new Player();
-    public Integer ActiveGameID,
-            mUserTeamID;
     final String API_GET_TOKEN = "http://x1.gametimegiving.com/experiment/GenerateToken";
     final String API_CHECK_OUT = "http://x1.gametimegiving.com/experiment/CreateTransaction";
-    // public String tokenizationKey = "sandbox_mdys6zxr_jstvnq9hgzfgrt79";
     final int REQUEST_CODE = 999;
     public Game mGame = new Game();
-    public Payment payment;
-    public String MyPledgeAmount;
-    public Boolean PreferredCharityNoticeShown;
     public boolean bFirstTimeIn = true;
-    HashMap<String, String> paramsHash;
     public Player mPlayer = new Player();
-    //  public Game mGame = null;
     Utilities utilities = new Utilities();
     Group pledgeButtons;
-    private ImageView mHomeLogo,
-            mAwayLogo;
-    private Context context;
-    private String[] arr = null;
     ImageView ivHomeTeamLogo, ivAwayTeamLogo;
     private String mClientToken;
     private Button mUndoLastPledge,
@@ -103,27 +78,19 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
             tvGameNotStarted;
     private AsyncHttpClient client = new AsyncHttpClient();
     private double TransactionAmt = 0;
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private Context mContext;
     String photoUrl;
-    private String username;
-
+    String username;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = getIntent().getExtras();
         String userId = bundle.getString("user");
-        String gameId = bundle.getString("game");
         username = bundle.getString("username");
         photoUrl = bundle.getString("photoUrl");
-        //TODO:(1)As a User I can pick a game and that game will be pulled up on the game board. Shared preeferences maybe?
-        mGame.setGameid(gameId);
         mPlayer.setUser(userId);
-        Log.d(TAG, String.format("Game ID set:%s", gameId));
-        //TODO:(2) As a user I can pick my team. Either I follow the team already or I can pick one to follow then.
         mPlayer.setMyteam("away");
+        String playerId = ReadSharedPref("playerid", this);
+        mPlayer.setId(playerId);
         setContentView(R.layout.gameboard);
-
         SetNavDrawer();
         tvGameNotStarted = findViewById(R.id.gamenotstarted);
         //Find and set all the textviews on the view
@@ -151,113 +118,30 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         pledgeBtn3.setOnClickListener(this);
         btnPayNow = findViewById(R.id.btnpaynow);
         //Find all the imageviews
-        mHomeLogo = findViewById(R.id.hometeamlogo);
-        mAwayLogo = findViewById(R.id.awayteamlogo);
+        // mHomeLogo = findViewById(R.id.hometeamlogo);
+        // mAwayLogo = findViewById(R.id.awayteamlogo);
         //Find the groups on the view
         pledgeButtons = findViewById(R.id.pledgeButtons);
-
-
         GetAGame();
-        if (getIntent().getExtras() != null) {
-            try {
-                Bundle extras = getIntent().getExtras();
-                bFirstTimeIn = extras.getBoolean(Constant.ISFIRSTTIMEIN);
-                ActiveGameID = extras.getInt("selectedgameid");
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-
-        }
-        Integer ag = utilities.ReadSharedPref("activegame", this);
-        context = this;
-        showdialog();
+        isFirstTimeUser();
+//        if (getIntent().getExtras() != null) {
+//            try {
+//                Bundle extras = getIntent().getExtras();
+//                bFirstTimeIn = extras.getBoolean(Constant.ISFIRSTTIMEIN);
+//                ActiveGameID = extras.getInt("selectedgameid");
+//            } catch (NullPointerException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+        //TODO: We probably want to put this back
+        //       showdialog();
 
     }
-
-
-    private void SetNavDrawer() {
-        mDrawerLayout = findViewById(R.id.drawer_layout);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.addDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-
-
-        mContext = this;
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        // set item as selected to persist highlight
-                        menuItem.setChecked(true);
-                        // close drawer when item is tapped
-                        mDrawerLayout.closeDrawers();
-                        int id = menuItem.getItemId();
-                        Intent intent = null;
-                        switch (id) {
-                            case R.id.nav_gameboard:
-                                intent = new Intent(mContext, GameBoardActivity.class);
-                                //    mContext.startActivity(intent);
-                                break;
-                            case R.id.nav_charities:
-                                intent = new Intent(mContext, CharitySelection.class);
-                                //      mContext.startActivity(intent);
-                                break;
-                            case R.id.nav_games:
-                                intent = new Intent(mContext, GameSelection.class);
-                                //        mContext.startActivity(intent);
-                                break;
-                            case R.id.nav_teams:
-                                intent = new Intent(mContext, TeamSelection.class);
-                                break;
-                            case R.id.nav_profile:
-                                intent = new Intent(mContext, Profile.class);
-                                break;
-
-                        }
-                        // Add code here to update the UI based on the item selected
-                        // For example, swap UI fragments here
-                        mContext.startActivity(intent);
-                        return true;
-                    }
-                });
-        View headerLayout = navigationView.getHeaderView(0);
-        Utilities.SetUserProfileInfo(headerLayout, username, photoUrl, mContext);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.mainmenu, menu);
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.action_settings:
-                Utilities.ShowVersion(this);
-                break;
-            case R.id.action_signout:
-                FirebaseAuth.getInstance().signOut();
-                Intent startMain = new Intent(Intent.ACTION_MAIN);
-                startMain.addCategory(Intent.CATEGORY_HOME);
-                startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(startMain);
-                break;
-
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
 
 
     public void GetAGame() {
+        DetermineCurrentGame();
         if (mGame.getGameid() != null) {
             DocumentReference gameRef = db.collection("games").document(mGame.getGameid());
             gameRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -286,6 +170,12 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         } else {
             Toast.makeText(this, "Oops! There is no Game to find. ", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void DetermineCurrentGame() {
+        //TODO:(1) Get the closest game based on the location of the user
+        //TODO:(2) Get the game based on the games the user follows
+        mGame.setGameid("suYroi6ZuratHkBDuyF7");
     }
 
     private void GetClientToken() {
@@ -335,13 +225,17 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void GetPersonalPledge() {
-        DocumentReference playerRef = db.collection("players").document("d5EASA7VcjebVFaPuSIA");
+        String playerID = mPlayer.getId();
+        if (playerID == null || playerID == "") {
+            playerID = ReadSharedPref("playerid", this);
+        }
+        DocumentReference playerRef = db.collection("players").document(playerID);
         playerRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
                     mPlayer = document.toObject(Player.class);
-                    Log.d(TAG, String.format("Pl%s has pledged $ %s in game %s", mPlayer.getId(),
+                    Log.d(TAG, String.format("Personal Pledge Amount For %s is %s during game %s", mPlayer.getId(),
                             Integer.toString(mPlayer.getPledgetotal()),
                             mPlayer.getGame()));
                     UpDatePersonalPledgeTotal(mPlayer);
@@ -386,15 +280,17 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
         switch (mGame.getGamestatus()) {
             case Constant.GAMENOTSTARTED:
                 pledgeButtons.setVisibility(View.GONE);
-                tvGameNotStarted.setText(String.format("Game Not Started"));
+                tvGameNotStarted.setText("Game Not Started");
                 tvGameNotStarted.setVisibility(View.VISIBLE);
                 ClearGameBoard();
+                Toast.makeText(this, "Game Not Started!", Toast.LENGTH_SHORT).show();
                 break;
             case Constant.GAMEINPROGRESS:
                 pledgeButtons.setVisibility(View.VISIBLE);
                 btnPayNow.setVisibility(View.GONE);
                 tvGameNotStarted.setVisibility(View.GONE);
                 GetPersonalPledge();
+                Toast.makeText(this, "Game In Progess!", Toast.LENGTH_SHORT).show();
                 break;
             case Constant.GAMEOVER:
                 GetClientToken();
@@ -403,7 +299,7 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
                 tvGameNotStarted.setVisibility(View.GONE);
                     btnPayNow.setVisibility(View.VISIBLE);
                 btnPayNow.setEnabled(false);
-                //  btnPayNow.setOnClickListener(v -> MakeBrainTreePayment());
+                Toast.makeText(this, "Game Over!", Toast.LENGTH_SHORT).show();
                 break;
         }
         UpdateGameBoard(mGame);
@@ -524,7 +420,6 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void CreatePlayer(int firstPledgeAmount) {
-        // Add a new document with a generated id.
         Map<String, Object> data = new HashMap<>();
         data.put("game", mGame.getGameid());
         data.put("pledgetotal", 0);
@@ -536,6 +431,7 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d(TAG, "Player created " + documentReference.getId());
                         mPlayer.setId(documentReference.getId());
+                        WriteSharedPref("playerid", documentReference.getId(), "s");
                         addPledges(firstPledgeAmount);
 
                     }
@@ -548,13 +444,13 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
                 });
     }
     public void showdialog() {
-        final CustomizeDialog customizeDialog = new CustomizeDialog(context);
+        final CustomizeDialog customizeDialog = new CustomizeDialog(this);
         customizeDialog.setContentView(R.layout.preferredcharitynotice);
         tv_PreferredCharityNotice = customizeDialog.findViewById(R.id.tv_preferredCharityNotice);
         Button button = customizeDialog.findViewById(R.id.btnok);
         button.setOnClickListener(v -> customizeDialog.dismiss());
         //Check if this is my first time in
-        bFirstTimeIn = utilities.ReadBoolSharedPref(Constant.ISFIRSTTIMEIN, this);
+        //   bFirstTimeIn = utilities.ReadBoolSharedPref(Constant.ISFIRSTTIMEIN, this);
         if (bFirstTimeIn) {
             String teamName = "The Team"; //mGame.getMyteam().getTeamName();
             String charityName = "The Charity";//mGame.getMyteam().getPreferredCharity().getCharityName();
@@ -564,32 +460,31 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
             tv_PreferredCharityNotice.setText(preferredCharityMessage);
             customizeDialog.show();
             customizeDialog.setCancelable(false);
-            utilities.WriteSharedPref(Constant.ISFIRSTTIMEIN, "false", this, "b");
+            //   WriteSharedPref(Constant.ISFIRSTTIMEIN, "false", "b");
         }
     }
 
 
     @Override
     public void onClick(View v) {
-
         int btnClicked = v.getId();
         switch (btnClicked) {
             case R.id.PledgeButton1:
-                if (mPlayer.getId() == null) {
+                if (mPlayer.getId() == "") {
                     CreatePlayer(Constant.FIRSTPLEDGEAMT);
                 } else {
                     addPledges(Constant.FIRSTPLEDGEAMT);
                 }
                 break;
             case R.id.PledgeButton2:
-                if (mPlayer.getId() == null) {
+                if (mPlayer.getId() == "") {
                     CreatePlayer(Constant.SECONDPLEDGEAMT);
                 } else {
                     addPledges(Constant.SECONDPLEDGEAMT);
                 }
                 break;
             case R.id.PledgeButton3:
-                if (mPlayer.getId() == null) {
+                if (mPlayer.getId() == "") {
                     CreatePlayer(Constant.THIRDPLEDGEAMT);
                 } else {
                     addPledges(5);
@@ -603,7 +498,7 @@ public class GameBoardActivity extends AppCompatActivity implements View.OnClick
 
     public void openDailogPledgesAdd(int pledge_value) {
         String sConfirmation;
-        final CustomizeDialog pledgeDialog = new CustomizeDialog(context);
+        final CustomizeDialog pledgeDialog = new CustomizeDialog(this);
         pledgeDialog.setContentView(R.layout.dialogpledges);
         TextView tv_pledge_donation = pledgeDialog.findViewById(R.id.tv_pledge_donation);
         if (pledge_value < 0) {
