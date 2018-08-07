@@ -17,14 +17,19 @@ import android.widget.Toast;
 import com.braintreepayments.api.dropin.DropInActivity;
 import com.braintreepayments.api.dropin.DropInRequest;
 import com.braintreepayments.api.dropin.DropInResult;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.loopj.android.http.AsyncHttpClient;
@@ -80,6 +85,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     private double TransactionAmt = 0;
     String photoUrl;
     String username;
+    String myteam = "away";
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = getIntent().getExtras();
@@ -87,7 +93,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         username = bundle.getString("username");
         photoUrl = bundle.getString("photoUrl");
         mPlayer.setUser(userId);
-        mPlayer.setMyteam("away");
+        DetermineHomeOrAway();
         String playerId = ReadSharedPref("playerid", this);
         mPlayer.setId(playerId);
         setContentView(R.layout.gameboard);
@@ -168,7 +174,8 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                 }
             });
         } else {
-            Toast.makeText(this, "Oops! There is no Game to find. ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Oops! There is no Game to find. Try Again!", Toast.LENGTH_SHORT).show();
+            DetermineCurrentGame();
         }
     }
 
@@ -176,6 +183,13 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         //TODO:(1) Get the closest game based on the location of the user
         //TODO:(2) Get the game based on the games the user follows
         mGame.setGameid("suYroi6ZuratHkBDuyF7");
+        WriteSharedPref("gameid", mGame.getGameid(), "s");
+    }
+
+    private void DetermineHomeOrAway() {
+        String homeoraway = "away";
+        mPlayer.setMyteam(homeoraway);
+        WriteSharedPref("myteam", homeoraway, "s");
     }
 
     private void GetClientToken() {
@@ -229,20 +243,25 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         if (playerID == null || playerID == "") {
             playerID = ReadSharedPref("playerid", this);
         }
-        DocumentReference playerRef = db.collection("players").document(playerID);
-        playerRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document.exists()) {
-                    mPlayer = document.toObject(Player.class);
-                    Log.d(TAG, String.format("Personal Pledge Amount For %s is %s during game %s", mPlayer.getId(),
-                            Integer.toString(mPlayer.getPledgetotal()),
-                            mPlayer.getGame()));
-                    UpDatePersonalPledgeTotal(mPlayer);
+        if (playerID != null && playerID != "") {
+            Log.d(TAG, String.format("The playerid is %s", playerID));
+            DocumentReference playerRef = db.collection("players").document(playerID);
+            playerRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        mPlayer = document.toObject(Player.class);
+                        Log.d(TAG, String.format("Personal Pledge Amount For %s is %s during game %s", mPlayer.getId(),
+                                Integer.toString(mPlayer.getPledgetotal()),
+                                mPlayer.getGame()));
+                        UpDatePersonalPledgeTotal(mPlayer);
+                    }
                 }
-            }
 
-        });
+            });
+        } else {
+            Toast.makeText(this, "Oops! We couldn't find a player id", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void UpDatePersonalPledgeTotal(Player player) {
@@ -371,34 +390,79 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         );
     }
 
-    private void addPledges(int amount) {
-        Map<String, Object> pledge = new HashMap<>();
-        pledge.put("game", mGame.getGameid());
-        pledge.put("user", mPlayer.getUser());
-        pledge.put("player", mPlayer.getId());
-        pledge.put("amount", amount);
-        pledge.put("myteam", mPlayer.getMyteam());
-        UpdateGameBoardLocal(mPlayer.getMyteam(), amount);
-        db.collection("pledges")
-                .add(pledge)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference pledgeRef) {
-                        mPlayer.setMylastpledgeid(pledgeRef.getId());
-                        mMyLastPledge = amount;
-                        if (amount > 0) {
-                            mUndoLastPledge.setEnabled(true);
+    void addPledges(int amount) {
+        String gameid = ReadSharedPref("gameid", this);
+        String user = ReadSharedPref("user", this);
+        String player = ReadSharedPref("player", this);
+        String myteam = ReadSharedPref("myteam", this);
+        if (gameid != null && user != null && player != null && myteam != null) {
+            Map<String, Object> pledge = new HashMap<>();
+            pledge.put("game", gameid);
+            pledge.put("user", user);
+            pledge.put("player", player);
+            pledge.put("amount", amount);
+            pledge.put("myteam", myteam);
+            UpdateGameBoardLocal(myteam, amount);
+            db.collection("pledges")
+                    .add(pledge)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference pledgeRef) {
+                            mPlayer.setMylastpledgeid(pledgeRef.getId());
+                            mMyLastPledge = amount;
+                            if (amount > 0) {
+                                mUndoLastPledge.setEnabled(true);
+                            }
                         }
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error writing document", e);
+                        }
+                    });
 
-        openDailogPledgesAdd(amount);
+            openDailogPledgesAdd(amount);
+        } else {
+            String missingItem = "";
+            if (gameid == null) {
+                missingItem = "GameId";
+                DetermineCurrentGame();
+            }
+            if (user == null) {
+                missingItem = "UserId";
+            }
+            if (player == null) {
+                missingItem = "PlayerId";
+                DeterminePlayer();
+            }
+            if (myteam == null) {
+                missingItem = "Your Team";
+                DetermineHomeOrAway();
+            }
+            Toast.makeText(this, String.format("Oops! Invalid Pledge... We can't find %s Try Again!", missingItem), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void DeterminePlayer() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference playersCollection = db.collection("players");
+        Query qPlayerRef = playersCollection.whereEqualTo("user", userId);
+        qPlayerRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        if (document.exists()) {
+                            mPlayer = document.toObject(Player.class);
+                            mPlayer.setId(document.getId());
+                            WriteSharedPref("player", mPlayer.getId(), "s");
+                        }
+
+                    }
+                }
+            }
+        });
     }
 
     private void UpdateGameBoardLocal(String myTeam, int pledgeAmount) {
@@ -433,7 +497,6 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                         mPlayer.setId(documentReference.getId());
                         WriteSharedPref("playerid", documentReference.getId(), "s");
                         addPledges(firstPledgeAmount);
-
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
