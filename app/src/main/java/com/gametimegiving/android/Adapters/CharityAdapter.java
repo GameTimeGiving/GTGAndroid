@@ -1,4 +1,4 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +13,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gametimegiving.android.Activities.CharityDetail;
+import com.gametimegiving.android.Helpers.GlideApp;
+import com.gametimegiving.android.R;
+import com.gametimegiving.android.models.Charity;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 

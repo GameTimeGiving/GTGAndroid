@@ -1,4 +1,4 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.Helpers;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.gametimegiving.android.R;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

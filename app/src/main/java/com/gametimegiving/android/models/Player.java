@@ -1,4 +1,6 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.models;
+
+import com.gametimegiving.android.Helpers.Utilities;
 
 public class Player {
     private static final String TAG = "Player";
@@ -13,11 +15,11 @@ public class Player {
     private Charity[] myCharities;
     private Team[] myTeams;
 
-    Player() {
+    public Player() {
 
     }
 
-    Player(String game, int pledgetotal, String user, String id) {
+    public Player(String game, int pledgetotal, String user, String id) {
         this.game = game;
         this.pledgetotal = pledgetotal;
         this.user = user;

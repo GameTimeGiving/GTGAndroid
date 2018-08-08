@@ -1,5 +1,7 @@
 package com.gametimegiving.android;
 
+import com.gametimegiving.android.Activities.GameBoardActivity;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -23,9 +25,10 @@ public class GameBoardActivityTest {
 
         //Act
 
-        activity.addPledges(pledgeAmount);
+        //activity.addPledges(pledgeAmount);
 
         //Assert
+        fail("Not Implemented");
 
     }
 
@@ -43,12 +46,11 @@ public class GameBoardActivityTest {
 //        });
 //    }
 
-    private void setPlayer() {
-    }
+
 
     @Test
-    public void getAGame() {
-        fail("Not Implemented");
+    public void DetermineAPlayer() {
+        //
     }
 
     @Test
@@ -83,6 +85,14 @@ public class GameBoardActivityTest {
 
 
     @Test
-    public void onCreate() {
+    public void GetPersonalPledge() {
+        //Arrange
+
+        //Act
+        GetPersonalPledge();
+        //Assert
+
+
+
     }
 }

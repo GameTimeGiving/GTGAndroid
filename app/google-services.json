@@ -15,27 +15,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "981905831875-gemj2atr1n5f2jd2rr8gk0r3d12fq5p3.apps.googleusercontent.com",
+          "client_id": "981905831875-2j882o0t7pap1kv6c6efkldqsa6hkita.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.gametimegiving.android",
-            "certificate_hash": "413dd04ccd36ca2a40b0cc721de501e0ab6fe68d"
+            "certificate_hash": "9c226dc5296449f3a18bea65677e47f7a8509f22"
           }
         },
         {
-          "client_id": "981905831875-bi6enev7goei70af2hqk1be00j5g88ui.apps.googleusercontent.com",
+          "client_id": "981905831875-9ja6n1arddk76tk8cha4ngrmlaa6rrq5.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.gametimegiving.android",
-            "certificate_hash": "3d6b0aa8de3228de657b678f77086a20271e099e"
-          }
-        },
-        {
-          "client_id": "981905831875-1fcs1p6h676lr0gfgoevbspl0s5citko.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.gametimegiving.android",
-            "certificate_hash": "9123361f435bcc4a69e620b1bc65274a6e695dcf"
+            "certificate_hash": "65c6db2d28c2477a9e6625033b7afce309e38b33"
           }
         },
         {

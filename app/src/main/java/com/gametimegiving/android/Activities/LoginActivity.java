@@ -1,7 +1,6 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.Activities;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
@@ -9,6 +8,8 @@ import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
+import com.gametimegiving.android.Helpers.Utilities;
+import com.gametimegiving.android.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -19,11 +20,7 @@ public class LoginActivity extends GTGBaseActivity {
     private static final int RC_SIGN_IN = 777;
     final public FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final String TAG = getClass().getSimpleName();
-    //  private final String gameId = "suYroi6ZuratHkBDuyF7";
-    String userId;
-    private String name;
-    private String email;
-    private Uri photoUrl;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -35,6 +32,7 @@ public class LoginActivity extends GTGBaseActivity {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
             userId = auth.getCurrentUser().getUid();
+            name = auth.getCurrentUser().getDisplayName();
             Bundle bundle = new Bundle();
             bundle.putString("user", userId);
             bundle.putString("username", name);
@@ -53,6 +51,7 @@ public class LoginActivity extends GTGBaseActivity {
                             .createSignInIntentBuilder()
                             .setTheme(R.style.GTGAppTheme)
                             .setAvailableProviders(Arrays.asList(
+                                    new AuthUI.IdpConfig.GoogleBuilder().build(),
                                     new AuthUI.IdpConfig.FacebookBuilder().build(),
                                     new AuthUI.IdpConfig.EmailBuilder().build()))
                             .build(),
@@ -61,7 +60,7 @@ public class LoginActivity extends GTGBaseActivity {
 //                    AuthUI.getInstance()
 //                            .createSignInIntentBuilder()
 //                            .setAvailableProviders(Arrays.asList(
-//                                    new AuthUI.IdpConfig.GoogleBuilder().build(),
+
 //                                    new AuthUI.IdpConfig.FacebookBuilder().build(),
 //                                    new AuthUI.IdpConfig.TwitterBuilder().build(),
 //                                    new AuthUI.IdpConfig.EmailBuilder().build(),
@@ -80,13 +79,12 @@ public class LoginActivity extends GTGBaseActivity {
             IdpResponse response = IdpResponse.fromResultIntent(data);
 
             if (resultCode == RESULT_OK) {
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                 Bundle bundle = new Bundle();
-
-                bundle.putString("user", user.getUid());
-                bundle.putString("username", user.getDisplayName());
+                bundle.putString("user", firebaseUser.getUid());
+                bundle.putString("username", firebaseUser.getDisplayName());
                 if (photoUrl != null) {
-                    bundle.putString("photoUrl", photoUrl.toString());
+                    bundle.putString("photoUrl", firebaseUser.getPhotoUrl().toString());
                 } else {
                     bundle.putString("photoUrl", "");
                 }

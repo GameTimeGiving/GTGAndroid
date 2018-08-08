@@ -1,4 +1,4 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.models;
 
 public class Charity {
     private String id;

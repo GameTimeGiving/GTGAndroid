@@ -1,4 +1,4 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.Helpers;
 
 import android.content.Context;
 

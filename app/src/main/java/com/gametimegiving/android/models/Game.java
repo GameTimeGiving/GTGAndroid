@@ -1,4 +1,4 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

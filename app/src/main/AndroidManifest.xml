@@ -13,20 +13,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".GameBoardActivity"
+            android:name=".Activities.GameBoardActivity"
             android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".CharitySelection">
+        <activity android:name=".Activities.CharitySelection">
         </activity>
-        <activity android:name=".CharityDetail">
+        <activity android:name=".Activities.CharityDetail">
         </activity>
-        <activity android:name=".TeamSelection">
+        <activity android:name=".Activities.TeamSelection">
         </activity>
-        <activity android:name=".GameSelection">
+        <activity android:name=".Activities.GameSelection">
         </activity>
-        <activity android:name=".Profile">
+        <activity android:name=".Activities.Profile">
         </activity>
-        <activity android:name=".LoginActivity">
+        <activity android:name=".Activities.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

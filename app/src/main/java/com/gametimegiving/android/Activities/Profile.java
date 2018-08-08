@@ -1,6 +1,8 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.Activities;
 
 import android.os.Bundle;
+
+import com.gametimegiving.android.R;
 
 public class Profile extends GTGBaseActivity {
 

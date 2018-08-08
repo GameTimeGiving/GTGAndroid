@@ -1,67 +1,59 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.Activities;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
+import com.gametimegiving.android.Adapters.TeamAdapter;
+import com.gametimegiving.android.R;
+import com.gametimegiving.android.models.Team;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CharitySelection extends GTGBaseActivity {
+public class TeamSelection extends GTGBaseActivity {
     final public FirebaseFirestore db = FirebaseFirestore.getInstance();
-    final public String TAG = "CharitySelection";
-    List<Charity> charityList;
+    final public String TAG = "TeamSelection";
+    List<Team> teamList;
     private RecyclerView mRecyclerView;
-    private CharityAdapter mAdapter;
+    private TeamAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private Context mContext = this;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_charity_selection);
+        setContentView(R.layout.activity_team_selection);
         SetNavDrawer();
-        GetCharity("ALL");
-
+        GetTeam("ALL");
     }
 
-
     private void SetAdapter() {
-        mRecyclerView = findViewById(R.id.listofcharities);
+        mRecyclerView = findViewById(R.id.listofteams);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new CharityAdapter(this, charityList);
+        mAdapter = new TeamAdapter(this, teamList);
         mRecyclerView.setAdapter(mAdapter);
     }
 
-    private void GetCharity(String all) {
-        // int gameId = 001;
-        charityList = new ArrayList<Charity>();
-        db.collection("charity")
+    private void GetTeam(String all) {
+        teamList = new ArrayList<Team>();
+        db.collection("teams")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            Charity charity = document.toObject(Charity.class);
-                            charity.setId(document.getId());
-                            charityList.add(charity);
+                            Team team = document.toObject(Team.class);
+                            teamList.add(team);
                         }
                         SetAdapter();
                     } else {
-                        Log.d(TAG, "Getting Charities is failing");
+                        Log.d(TAG, "Getting Teams is failing");
                     }
                 });
 
     }
-
 
 }

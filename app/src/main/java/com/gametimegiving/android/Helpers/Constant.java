@@ -1,4 +1,4 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.Helpers;
 
 public class Constant {
     public static final String MyPREFERENCES = "MyPrefs";

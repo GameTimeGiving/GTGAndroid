@@ -1,5 +1,7 @@
 package com.gametimegiving.android;
 
+import com.gametimegiving.android.Helpers.Utilities;
+
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;

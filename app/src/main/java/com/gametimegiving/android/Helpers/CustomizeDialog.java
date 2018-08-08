@@ -1,5 +1,4 @@
-
-package com.gametimegiving.android;
+package com.gametimegiving.android.Helpers;
 
 
 import android.app.Dialog;
@@ -7,12 +6,14 @@ import android.content.Context;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.gametimegiving.android.R;
 
-class CustomizeDialog extends Dialog {
+public class CustomizeDialog extends Dialog {
 
     private Context context;
 
-    CustomizeDialog(Context context) {
+
+    public CustomizeDialog(Context context) {
         super(context, R.style.Theme_Dialog_Translucent);
         try {
             requestWindowFeature(Window.FEATURE_NO_TITLE);

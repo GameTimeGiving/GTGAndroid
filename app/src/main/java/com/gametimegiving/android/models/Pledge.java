@@ -1,6 +1,8 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.models;
 
 import android.app.Activity;
+
+import com.gametimegiving.android.Helpers.Utilities;
 
 import java.util.Date;
 

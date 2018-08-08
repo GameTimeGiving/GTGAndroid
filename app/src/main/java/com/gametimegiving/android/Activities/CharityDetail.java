@@ -1,4 +1,4 @@
-package com.gametimegiving.android;
+package com.gametimegiving.android.Activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,6 +15,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gametimegiving.android.Adapters.CharityAdapter;
+import com.gametimegiving.android.Helpers.GlideApp;
+import com.gametimegiving.android.Helpers.Utilities;
+import com.gametimegiving.android.R;
+import com.gametimegiving.android.models.Charity;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -107,7 +112,7 @@ public class CharityDetail extends GTGBaseActivity {
             public void onClick(View v) {
                 Activity activity = (Activity) (v.getContext());
                 Toast.makeText(v.getContext(), String.format("Saving %s to your profile.", charity.getName()), Toast.LENGTH_SHORT).show();
-                WriteSharedPref("SCharity1", charityid, "s");
+                WriteStringSharedPref("SCharity1", charityid);
             }
         });
 
