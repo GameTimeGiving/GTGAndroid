@@ -61,7 +61,7 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
             name = user.getDisplayName();
             email = user.getEmail();
             photoUrl = user.getPhotoUrl();
-            gtguser = new User(userId, name, email, photoUrl.toString());
+            gtguser = new User(userId, name, email, photoUrl);
         }
     }
 
@@ -156,11 +156,18 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
         TextView tvUserName = view.findViewById(R.id.tvusername);
         ImageView userProfileImage = view.findViewById(R.id.userprofileimage);
         tvUserName.setText(String.format("Logged In As: %s", gtguser.getName()));
-        if (photoUrl.toString() != "") {
-            GlideApp.with(getApplicationContext() /* context */)
-                    .load(photoUrl)
-                    .into(userProfileImage);
+        String sPhotoUrl = "";
+        try {
+            sPhotoUrl = photoUrl.toString();
+        } catch (NullPointerException ex) {
+
         }
+        if (sPhotoUrl != ""){
+            GlideApp.with(getApplicationContext() /* context */)
+                    .load(sPhotoUrl)
+                    .into(userProfileImage);
+            }
+
     }
 
     @Override
@@ -267,7 +274,13 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
         editor.clear().commit();
     }
 
+    public String GetUserIdFromSharedPrefs() {
+        return  ReadSharedPref("user", this);
+    }
 
+    public String GetPlayerFromSharedPrefs() {
+        return  ReadSharedPref("player", this);
+    }
     public boolean isFirstTimeIn(Game game) {
         String status = "";
         boolean firstTimer = false;

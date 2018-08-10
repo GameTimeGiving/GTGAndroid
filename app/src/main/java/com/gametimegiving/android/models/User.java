@@ -1,12 +1,14 @@
 package com.gametimegiving.android.models;
 
+import android.net.Uri;
+
 public class User {
     String id;
     String name;
     String email;
-    String photoUrl;
+    Uri photoUrl;
 
-    public User(String id, String name, String email, String photoUrl) {
+    public User(String id, String name, String email, Uri photoUrl) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -37,11 +39,11 @@ public class User {
         this.email = email;
     }
 
-    public String getPhotoUrl() {
+    public Uri getPhotoUrl() {
         return photoUrl;
     }
 
-    public void setPhotoUrl(String photoUrl) {
+    public void setPhotoUrl(Uri photoUrl) {
         this.photoUrl = photoUrl;
     }
 }

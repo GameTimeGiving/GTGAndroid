@@ -35,5 +35,7 @@
     <string name="cd_logo_of_the_charity">Logo of the charity</string>
     <string name="demo">Demo App</string>
     <string name="clearprefs">Reset</string>
+    <string name="termsofserviceurl">https://www.gametimegiving.com/terms.html</string>
+    <string name="privacypolicyurl">https://www.gametimegiving.com/privacy.html</string>
 
 </resources>

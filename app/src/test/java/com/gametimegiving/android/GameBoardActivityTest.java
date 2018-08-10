@@ -1,6 +1,9 @@
 package com.gametimegiving.android;
 
 import com.gametimegiving.android.Activities.GameBoardActivity;
+import com.gametimegiving.android.models.Player;
+
+import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +16,19 @@ public class GameBoardActivityTest {
 
     }
 
+    @Test
+    public void WhenThePlayerIdIsSetDeterminePlayerReturnsTheCorrectID(){
+        //Arrange
+        String expectedPlayerId ="xxxxxxxxxxxx";
+        Player mPlayer = new Player();
+        mPlayer.setId(expectedPlayerId);
+        GameBoardActivity activity = new GameBoardActivity();
+        //Act
+        String actualPlayerId=activity.DeterminePlayer();
+        //Assert
+        Assert.assertEquals(expectedPlayerId,actualPlayerId);
+
+    }
     @Test
     public void addPledgesTest() {
         //Arrange
@@ -48,12 +64,7 @@ public class GameBoardActivityTest {
 
 
 
-    @Test
-    public void DetermineAPlayer() {
-        //
-    }
-
-    @Test
+        @Test
     public void getGames() {
         fail("Not Implemented");
     }

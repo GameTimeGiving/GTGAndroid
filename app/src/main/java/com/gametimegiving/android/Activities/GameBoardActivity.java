@@ -32,7 +32,6 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -437,11 +436,11 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
 
     public String DeterminePlayer() {
         String PlayerId = mPlayer.getId();
+        if (PlayerId == "")  PlayerId = GetPlayerFromSharedPrefs();
         if (PlayerId == "") {
-            PlayerId = ReadSharedPref("player", this);
-        }
-        if (PlayerId == "") {
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
+        userId=gtguser.getId();
+        if(userId=="") userId=GetUserIdFromSharedPrefs();
+          //  FirebaseFirestore db = FirebaseFirestore.getInstance();
             CollectionReference playersCollection = db.collection("players");
             Query qPlayerRef = playersCollection.whereEqualTo("user", userId);
             qPlayerRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -462,6 +461,8 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         }
         return PlayerId;
     }
+
+
 
     private void UpdateGameBoardLocal(String myTeam, int pledgeAmount) {
         int hometeampledgetotal = utilities.RemoveCurrency(tv_HomeTeamPledgeTotals.getText().toString());
