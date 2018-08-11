@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -155,7 +156,7 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
     public void SetUserProfileInfo(View view, User user) {
         TextView tvUserName = view.findViewById(R.id.tvusername);
         ImageView userProfileImage = view.findViewById(R.id.userprofileimage);
-        tvUserName.setText(String.format("Logged In As: %s", gtguser.getName()));
+        tvUserName.setText(String.format("Logged In As: %s", user.getName()));
         String sPhotoUrl = "";
         try {
             sPhotoUrl = photoUrl.toString();
@@ -211,6 +212,11 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
         return Count;
     }
 
+    public void SaveUserLocal(FirebaseUser user) {
+        WriteStringSharedPref("user", user.getUid());
+        WriteStringSharedPref("name", user.getDisplayName());
+        WriteStringSharedPref("photoURL", user.getPhotoUrl().toString());
+    }
     public void ShowWelcomeDialog(String status) {
         new FancyGifDialog.Builder(this)
                 .setTitle(String.format("Game %s", status))
@@ -274,6 +280,11 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
         editor.clear().commit();
     }
 
+    public void GTGSnackBar(View v, String Message) {
+        Snackbar.make(v
+                , String.format(Message),
+                Snackbar.LENGTH_LONG).show();
+    }
     public String GetUserIdFromSharedPrefs() {
         return  ReadSharedPref("user", this);
     }

@@ -31,18 +31,19 @@ public class LoginActivity extends GTGBaseActivity {
         // setContentView(R.layout.activity_login);
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
-            userId = auth.getCurrentUser().getUid();
-            name = auth.getCurrentUser().getDisplayName();
-            Bundle bundle = new Bundle();
-            bundle.putString("user", userId);
-            bundle.putString("username", name);
-            if (photoUrl != null) {
-                bundle.putString("photoUrl", photoUrl.toString());
-            } else {
-                bundle.putString("photoUrl", "");
-            }
+            SaveUserLocal(auth.getCurrentUser());
+//            userId = auth.getCurrentUser().getUid();
+//            name = auth.getCurrentUser().getDisplayName();
+//            Bundle bundle = new Bundle();
+//            bundle.putString("user", userId);
+//            bundle.putString("username", name);
+//            if (photoUrl != null) {
+//                bundle.putString("photoUrl", photoUrl.toString());
+//            } else {
+//                bundle.putString("photoUrl", "");
+//            }
             Intent intent = new Intent(this, GameBoardActivity.class);
-            intent.putExtras(bundle);
+//            intent.putExtras(bundle);
             startActivity(intent);
             finish();
         } else {
@@ -74,16 +75,17 @@ public class LoginActivity extends GTGBaseActivity {
 
             if (resultCode == RESULT_OK) {
                 FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                Bundle bundle = new Bundle();
-                bundle.putString("user", firebaseUser.getUid());
-                bundle.putString("username", firebaseUser.getDisplayName());
-                if (photoUrl != null) {
-                    bundle.putString("photoUrl", firebaseUser.getPhotoUrl().toString());
-                } else {
-                    bundle.putString("photoUrl", "");
-                }
+                SaveUserLocal(firebaseUser);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("user", firebaseUser.getUid());
+//                bundle.putString("username", firebaseUser.getDisplayName());
+//                if (photoUrl != null) {
+//                    bundle.putString("photoUrl", firebaseUser.getPhotoUrl().toString());
+//                } else {
+//                    bundle.putString("photoUrl", "");
+//                }
                 Intent intent = new Intent(this, GameBoardActivity.class);
-                intent.putExtras(bundle);
+//                intent.putExtras(bundle);
                 startActivity(intent);
                 finish();
 

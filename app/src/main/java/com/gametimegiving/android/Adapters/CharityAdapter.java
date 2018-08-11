@@ -11,9 +11,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.gametimegiving.android.Activities.CharityDetail;
+import com.gametimegiving.android.Activities.GTGBaseActivity;
 import com.gametimegiving.android.Helpers.GlideApp;
 import com.gametimegiving.android.R;
 import com.gametimegiving.android.models.Charity;
@@ -27,6 +27,7 @@ public class CharityAdapter extends RecyclerView.Adapter<CharityAdapter.CharityV
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private Context mCtx;
     private List<Charity> mCharityList;
+    private GTGBaseActivity mGTGBaseActivity;
 
     public CharityAdapter(Context ctx, List<Charity> charityList) {
         mCtx = ctx;
@@ -56,8 +57,8 @@ public class CharityAdapter extends RecyclerView.Adapter<CharityAdapter.CharityV
                     holder.btnsave.setText(R.string.followtext);
                 }
 
+                mGTGBaseActivity.GTGSnackBar(v, "Saving this charity to your profile");
 
-                Toast.makeText(mCtx, "Saving this charity for you", Toast.LENGTH_SHORT).show();
 
             }
         });

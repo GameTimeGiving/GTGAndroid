@@ -56,7 +56,6 @@ import cz.msebera.android.httpclient.Header;
 public class GameBoardActivity extends GTGBaseActivity implements View.OnClickListener {
     private final static int SUBMIT_PAYMENT_REQUEST_CODE = 100;
     //final public FirebaseFirestore db = FirebaseFirestore.getInstance();
-    final int MaxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
     private final String TAG = getClass().getSimpleName();
     final String API_GET_TOKEN = "http://x1.gametimegiving.com/experiment/GenerateToken";
     final String API_CHECK_OUT = "http://x1.gametimegiving.com/experiment/CreateTransaction";
@@ -87,21 +86,23 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     private AsyncHttpClient client = new AsyncHttpClient();
     private double TransactionAmt = 0;
     String photoUrl;
-    String username;
+    String user;
     String myteam = "away";
+    String playerID;
+
+
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle bundle = getIntent().getExtras();
-        String userId = bundle.getString("user");
-        username = bundle.getString("username");
-        photoUrl = bundle.getString("photoUrl");
-        mPlayer.setUser(userId);
         DetermineHomeOrAway();
-        String playerId = ReadSharedPref("playerid", this);
-        mPlayer.setId(playerId);
+        playerID = ReadSharedPref("player", this);
+        mPlayer.setId(playerID);
         setContentView(R.layout.gameboard);
+        GTGSnackBar(findViewById(R.id.GameBoardLayout), "On Create");
+
         SetNavDrawer();
         tvGameNotStarted = findViewById(R.id.gamenotstarted);
+
         //Find and set all the textviews on the view
         tv_HomeTeamName = findViewById(R.id.HomeTeamName);
         tv_homeTeamMascot = findViewById(R.id.HomeTeamMascot);
@@ -128,10 +129,15 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         btnPayNow = findViewById(R.id.btnpaynow);
         pledgeButtons = findViewById(R.id.pledgeButtons);
         GetAGame();
-
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        GTGSnackBar(findViewById(R.id.GameBoardLayout), "On Resume");
+        playerID = ReadSharedPref("player", this);
+        mPlayer.setId(playerID);
+    }
     public void GetAGame() {
         DetermineCurrentGame();
         if (mGame.getGameid() != null) {
@@ -149,8 +155,8 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                         Log.d(TAG, "Current data: " + snapshot.getData());
                         mGame = snapshot.toObject(Game.class);
                         mGame.setGameid(gameRef.getId());
-                        Log.d(TAG, String.format("GameData - Player Pledge: %s",
-                                Integer.toString(mGame.getPlayer().getPledgetotal())));
+//                        Log.d(TAG, String.format("GameData - Player Pledge: %s",
+//                                Integer.toString(mGame.getPlayer().getPledgetotal())));
                         GetTeamLogos();
                         SetGameBoardMode(mGame);
                         isFirstTimeIn(mGame);
@@ -226,20 +232,15 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     }
 
     public void GetPersonalPledge() {
-        String playerID = DeterminePlayer();
-
-        if (playerID != "") {
-            Log.d(TAG, String.format("The playerid is %s", playerID));
+        playerID = DeterminePlayer();
+        if (playerID != "" && playerID != null) {
             DocumentReference playerRef = db.collection("players").document(playerID);
             playerRef.get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         mPlayer = document.toObject(Player.class);
-//                        Log.d(TAG, String.format("Personal Pledge Amount For %s is %s during game %s", playerID,
-//                                Integer.toString(mPlayer.getPledgetotal()),
-//                                mPlayer.getGame()));
-                        UpDatePersonalPledgeTotal(mPlayer);
+                        UpDatePersonalPledgeTotal();
                     }
                 }
 
@@ -251,10 +252,10 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         }
     }
 
-    private void UpDatePersonalPledgeTotal(Player player) {
+    private void UpDatePersonalPledgeTotal() {
         int MyTotal = 0;
         try {
-            MyTotal = player.getPledgetotal();
+            MyTotal = mPlayer.getPledgetotal();
         } catch (Exception e) {
             MyTotal = 0;
         }
@@ -321,7 +322,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         mGame.setHometeampledgetotal(0);
         mGame.setAwayteampledgetotal(0);
         mPlayer.setPledgetotal(0);
-        UpDatePersonalPledgeTotal(mPlayer);
+        UpDatePersonalPledgeTotal();
     }
 
 
@@ -435,12 +436,10 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     }
 
     public String DeterminePlayer() {
-        String PlayerId = mPlayer.getId();
-        if (PlayerId == "")  PlayerId = GetPlayerFromSharedPrefs();
-        if (PlayerId == "") {
-        userId=gtguser.getId();
-        if(userId=="") userId=GetUserIdFromSharedPrefs();
-          //  FirebaseFirestore db = FirebaseFirestore.getInstance();
+        playerID = mPlayer.getId();
+        if (playerID == "") playerID = GetPlayerFromSharedPrefs();
+        if (playerID == "") {
+            userId = GetUserIdFromSharedPrefs();
             CollectionReference playersCollection = db.collection("players");
             Query qPlayerRef = playersCollection.whereEqualTo("user", userId);
             qPlayerRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -459,7 +458,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                 }
             });
         }
-        return PlayerId;
+        return playerID;
     }
 
 
@@ -514,21 +513,21 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         int btnClicked = v.getId();
         switch (btnClicked) {
             case R.id.PledgeButton1:
-                if (mPlayer.getId() == "") {
+                if (playerID == "") {
                     CreatePlayer(Constant.FIRSTPLEDGEAMT);
                 } else {
                     addPledges(Constant.FIRSTPLEDGEAMT);
                 }
                 break;
             case R.id.PledgeButton2:
-                if (mPlayer.getId() == "") {
+                if (playerID == "") {
                     CreatePlayer(Constant.SECONDPLEDGEAMT);
                 } else {
                     addPledges(Constant.SECONDPLEDGEAMT);
                 }
                 break;
             case R.id.PledgeButton3:
-                if (mPlayer.getId() == "") {
+                if (playerID == "") {
                     CreatePlayer(Constant.THIRDPLEDGEAMT);
                 } else {
                     addPledges(5);
@@ -538,6 +537,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                 undoLastPledge();
                 break;
         }
+
         DemoMode = ReadBoolSharedPref("demo", this);
         if (DemoMode == true) {
             int pledgecount = GetPledgeCount();
