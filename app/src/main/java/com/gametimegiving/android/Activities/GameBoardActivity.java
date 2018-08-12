@@ -98,7 +98,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         playerID = ReadSharedPref("player", this);
         mPlayer.setId(playerID);
         setContentView(R.layout.gameboard);
-        GTGSnackBar(findViewById(R.id.GameBoardLayout), "On Create");
+        //     GTGSnackBar(findViewById(R.id.GameBoardLayout), "On Create");
 
         SetNavDrawer();
         tvGameNotStarted = findViewById(R.id.gamenotstarted);
@@ -134,7 +134,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     @Override
     protected void onResume() {
         super.onResume();
-        GTGSnackBar(findViewById(R.id.GameBoardLayout), "On Resume");
+        //   GTGSnackBar(findViewById(R.id.GameBoardLayout), "On Resume");
         playerID = ReadSharedPref("player", this);
         mPlayer.setId(playerID);
     }
@@ -246,8 +246,10 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
 
             });
         } else {
-            if (!isFirstTimeIn(mGame)) {
-                Toast.makeText(this, "Oops! We couldn't find a player id", Toast.LENGTH_SHORT).show();
+            if (isFirstTimeIn(mGame) == false) {
+                String message = "Oops! We couldn't find a player id";
+                GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
+
             }
         }
     }
@@ -431,7 +433,8 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                 missingItem = "Your Team";
                 DetermineHomeOrAway();
             }
-            Toast.makeText(this, String.format("Oops! Invalid Pledge... We can't find %s Try Again!", missingItem), Toast.LENGTH_SHORT).show();
+            String message = String.format("Oops! Invalid Pledge... We can't find %s Try Again!", missingItem);
+            GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
         }
     }
 
@@ -509,7 +512,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
 
     @Override
     public void onClick(View v) {
-        Boolean DemoMode = false;
+        boolean DemoMode = false;
         int btnClicked = v.getId();
         switch (btnClicked) {
             case R.id.PledgeButton1:
@@ -540,14 +543,17 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
 
         DemoMode = ReadBoolSharedPref("demo", this);
         if (DemoMode == true) {
+            int remainingpledges = 0;
             int pledgecount = GetPledgeCount();
             if (pledgecount > 4) {
                 UpdateGameStatus(Constant.GAMEOVER);
                 WriteBoolSharedPref("demo", false);
                 WriteIntSharedPref("pledgecount", 0);
             } else {
+                remainingpledges = 5 - pledgecount;
                 pledgecount++;
-
+                WriteIntSharedPref("pledgecount", pledgecount);
+                GTGSnackBar(findViewById(R.id.GameBoardLayout), String.format("Pledge %s more times, to continue demo", String.valueOf(remainingpledges)));
             }
         }
     }

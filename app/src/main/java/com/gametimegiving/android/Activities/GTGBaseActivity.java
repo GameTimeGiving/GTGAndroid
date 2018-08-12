@@ -41,7 +41,7 @@ import java.util.Map;
 
 public abstract class GTGBaseActivity extends AppCompatActivity {
     final public FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final String TAG = getClass().getSimpleName();
+    private final String TAG = "GTGBaseActivity";
     public User gtguser;
     public Uri photoUrl;
     String userId;
@@ -53,6 +53,7 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
     String email;
     private TextView tv_PreferredCharityNotice;
     private Handler mHandler = new Handler();
+    boolean firstTimer;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -244,7 +245,8 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
 
     private void RunDemo() {
         //Set the Game status to Not Started
-        Toast.makeText(this, "Demo Mode", Toast.LENGTH_SHORT).show();
+        String message = "Demo Mode";
+        GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
         WriteBoolSharedPref("demo", true);
         UpdateGameStatus(Constant.GAMENOTSTARTED);
         mHandler.postDelayed(new Runnable() {
@@ -293,9 +295,12 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
         return  ReadSharedPref("player", this);
     }
     public boolean isFirstTimeIn(Game game) {
+
         String status = "";
-        boolean firstTimer = false;
-        Boolean val = ReadBoolSharedPref("firsttimein", this);
+        firstTimer = true;
+        boolean val = ReadBoolSharedPref("firsttimein", this);
+        Log.d(TAG, String.format("Inside isFirstTime firstTimer is %s and val is %s",
+                String.valueOf(firstTimer), String.valueOf(val)));
         if (val == true) {
             if (game.getGamestatus() == Constant.GAMENOTSTARTED) {
                 status = "Not Started";
