@@ -89,6 +89,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     String user;
     String myteam = "away";
     String playerID;
+    int iMyPledgeTotal;
 
 
 
@@ -134,12 +135,11 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     @Override
     protected void onResume() {
         super.onResume();
-        //   GTGSnackBar(findViewById(R.id.GameBoardLayout), "On Resume");
         playerID = ReadSharedPref("player", this);
         mPlayer.setId(playerID);
     }
     public void GetAGame() {
-        DetermineCurrentGame();
+        mGame.DetermineCurrentGame(this);
         if (mGame.getGameid() != null) {
             DocumentReference gameRef = db.collection("games").document(mGame.getGameid());
             gameRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -155,8 +155,6 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                         Log.d(TAG, "Current data: " + snapshot.getData());
                         mGame = snapshot.toObject(Game.class);
                         mGame.setGameid(gameRef.getId());
-//                        Log.d(TAG, String.format("GameData - Player Pledge: %s",
-//                                Integer.toString(mGame.getPlayer().getPledgetotal())));
                         GetTeamLogos();
                         SetGameBoardMode(mGame);
                         isFirstTimeIn(mGame);
@@ -168,21 +166,16 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
             });
         } else {
             Toast.makeText(this, "Oops! There is no Game to find. Try Again!", Toast.LENGTH_SHORT).show();
-            DetermineCurrentGame();
+            mGame.DetermineCurrentGame(this);
         }
     }
 
-    private void DetermineCurrentGame() {
-        //TODO:(1) Get the closest game based on the location of the user
-        //TODO:(2) Get the game based on the games the user follows
-        mGame.setGameid("suYroi6ZuratHkBDuyF7");
-        WriteStringSharedPref("gameid", mGame.getGameid());
-    }
+
 
     private void DetermineHomeOrAway() {
         String homeoraway = "away";
         mPlayer.setMyteam(homeoraway);
-        WriteStringSharedPref("myteam", homeoraway);
+        Utilities.WriteStringSharedPref("myteam", homeoraway, this);
     }
 
     private void GetClientToken() {
@@ -240,6 +233,8 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         mPlayer = document.toObject(Player.class);
+                        Log.d(TAG, String.format("Inside Get Personal Pledge the personal pledge of %s", Integer.toString(mPlayer.getPledgetotal())));
+                        WriteIntSharedPref("mypledgetotal", mPlayer.getPledgetotal());
                         UpDatePersonalPledgeTotal();
                     }
                 }
@@ -300,13 +295,16 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                 btnPayNow.setVisibility(View.GONE);
                 tvGameNotStarted.setVisibility(View.GONE);
                 GetPersonalPledge();
+                // ShowWelcomeDialog(Constant.GAMEINPROGRESS);
                 break;
             case Constant.GAMEOVER:
                 GetClientToken();
                 GetPersonalPledge();
                     pledgeButtons.setVisibility(View.GONE);
                 tvGameNotStarted.setVisibility(View.GONE);
-                if (mPlayer.getPledgetotal() > 0) {
+                iMyPledgeTotal = ReadIntSharedPref("mypledgetotal", this);
+                Toast.makeText(this, String.valueOf(iMyPledgeTotal), Toast.LENGTH_LONG).show();
+                if (iMyPledgeTotal > 0) {
                     btnPayNow.setVisibility(View.VISIBLE);
                     btnPayNow.setEnabled(false);
                 }
@@ -420,7 +418,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
             String missingItem = "";
             if (gameid == null) {
                 missingItem = "GameId";
-                DetermineCurrentGame();
+                mGame.DetermineCurrentGame(this);
             }
             if (user == null) {
                 missingItem = "UserId";
@@ -453,7 +451,8 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                             if (document.exists()) {
                                 mPlayer = document.toObject(Player.class);
                                 mPlayer.setId(document.getId());
-                                WriteStringSharedPref("player", mPlayer.getId());
+                                Utilities.WriteStringSharedPref("player", mPlayer.getId(), GameBoardActivity.this);
+                                //  WriteIntSharedPref("mypledgetotal",mPlayer.getPledgetotal());
                             }
 
                         }
@@ -470,6 +469,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         int hometeampledgetotal = utilities.RemoveCurrency(tv_HomeTeamPledgeTotals.getText().toString());
         int awayteampledgetotal = utilities.RemoveCurrency(tv_AwayTeamPledgeTotals.getText().toString());
         int playerpledgetotal = utilities.RemoveCurrency(tv_MyTotalPledgeTotals.getText().toString());
+
         if (myTeam == "home") {
             tv_HomeTeamPledgeTotals.setText(Utilities.FormatCurrency(hometeampledgetotal + pledgeAmount));
         } else {
@@ -496,7 +496,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d(TAG, "Player created " + documentReference.getId());
                         mPlayer.setId(documentReference.getId());
-                        WriteStringSharedPref("playerid", documentReference.getId());
+                        Utilities.WriteStringSharedPref("playerid", documentReference.getId(), GameBoardActivity.this);
                         addPledges(firstPledgeAmount);
                     }
                 })
@@ -585,7 +585,13 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
 
 
     public void UpdateGameBoard(Game mGame) {
-        tv_GamePeriod.setText(String.format("%s in the %s", mGame.getTimeleft(), mGame.getPeriod()));
+        String timeleft = "";
+        if (mGame.getGamestatus() == Constant.GAMEOVER) {
+            timeleft = "Game Over";
+        } else {
+            timeleft = String.format("%s in the %s", mGame.getTimeleft(), mGame.getPeriod());
+        }
+        tv_GamePeriod.setText(timeleft);
         tv_homeTeamScore.setText(Integer.toString(mGame.getHometeamscore()));
         tv_AwayTeamScore.setText(Integer.toString(mGame.getAwayteamscore()));
         tv_HomeTeamName.setText(mGame.getHometeam().getTeamname());

@@ -21,6 +21,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 
 public class Utilities {
+
     public void ShowMsg(String message, Context ctx) {
         Toast.makeText(ctx, message, Toast.LENGTH_LONG).show();
     }
@@ -89,7 +90,12 @@ public class Utilities {
         Toast.makeText(ctx, String.format("Version:%s", versionName), Toast.LENGTH_SHORT).show();
     }
 
-
+    public static void WriteStringSharedPref(String key, String val, Activity activity) {
+        SharedPreferences sharedPref = activity.getSharedPreferences(Constant.MyPREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(key, val);
+        editor.commit();
+    }
 
     public int RemoveCurrency(String dollars) {
         NumberFormat format = NumberFormat.getCurrencyInstance();

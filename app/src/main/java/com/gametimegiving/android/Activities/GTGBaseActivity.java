@@ -97,12 +97,7 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
 
     }
 
-    public void WriteStringSharedPref(String key, String val) {
-        SharedPreferences sharedPref = this.getSharedPreferences(Constant.MyPREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(key, val);
-        editor.commit();
-    }
+
 
     public void SetNavDrawer() {
         mDrawerLayout = findViewById(R.id.drawer_layout);
@@ -214,9 +209,9 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
     }
 
     public void SaveUserLocal(FirebaseUser user) {
-        WriteStringSharedPref("user", user.getUid());
-        WriteStringSharedPref("name", user.getDisplayName());
-        WriteStringSharedPref("photoURL", user.getPhotoUrl().toString());
+        Utilities.WriteStringSharedPref("user", user.getUid(), this);
+        Utilities.WriteStringSharedPref("name", user.getDisplayName(), this);
+        Utilities.WriteStringSharedPref("photoURL", user.getPhotoUrl().toString(), this);
     }
     public void ShowWelcomeDialog(String status) {
         new FancyGifDialog.Builder(this)
@@ -245,17 +240,26 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
 
     private void RunDemo() {
         //Set the Game status to Not Started
-        String message = "Demo Mode";
-        GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
+        //   String demoplayerid="sS0p0a631HWTcZUaIATy";
+        String message = "Operating in Demo Mode... Please wait 10 seconds";
+        // GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
+        GTGToast(message);
         WriteBoolSharedPref("demo", true);
         UpdateGameStatus(Constant.GAMENOTSTARTED);
+        // Utilities.WriteStringSharedPref("player", demoplayerid,this);
+        // mPlayer.setId(demoplayerid);
         mHandler.postDelayed(new Runnable() {
             public void run() {
                 UpdateGameStatus(Constant.GAMEINPROGRESS);
             }
-        }, 10000);
+        }, 5000);
         //Count 5 pledges
         //Set the Game Status to Over
+    }
+
+    private void GTGToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+
     }
 
     public void UpdateGameStatus(String status) {

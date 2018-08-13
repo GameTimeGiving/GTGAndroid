@@ -112,7 +112,7 @@ public class CharityDetail extends GTGBaseActivity {
             public void onClick(View v) {
                 Activity activity = (Activity) (v.getContext());
                 Toast.makeText(v.getContext(), String.format("Saving %s to your profile.", charity.getName()), Toast.LENGTH_SHORT).show();
-                WriteStringSharedPref("SCharity1", charityid);
+                Utilities.WriteStringSharedPref("SCharity1", charityid, CharityDetail.this);
             }
         });
 
