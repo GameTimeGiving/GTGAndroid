@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvhometeamname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/ivhometeamlogo"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Richwood"/>
+
+    <TextView
+        android:id="@+id/tvhometeammascot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        tools:layout_editor_absoluteX="73dp"
+        tools:layout_editor_absoluteY="219dp"
+        tools:text="Rams"/>
+
+    <TextView
+        android:id="@+id/tvawayteamname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvhometeamname"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="Wossman"/>
+
+    <TextView
+        android:id="@+id/tvawayteammascot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvhometeammascot"
+        app:layout_constraintTop_toTopOf="@+id/tvhometeammascot"
+        tools:layout_editor_absoluteX="264dp"
+        tools:text="Wildcats"/>
+
+    <ImageView
+        android:id="@+id/ivhometeamlogo"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:contentDescription="@string/placeholder"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/bt_ic_android_pay"
+        tools:layout_editor_absoluteY="91dp"/>
+
+    <ImageView
+        android:id="@+id/ivawayteamlogo"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:contentDescription="@string/placeholder"
+        app:layout_constraintBottom_toBottomOf="@+id/versus"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/versus"
+        app:layout_constraintVertical_bias="0.56"/>
+
+    <Button
+        android:id="@+id/btnsavegame"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:text="@string/Cancel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="280dp"/>
+
+    <ImageView
+        android:id="@+id/versus"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        app:layout_constraintBottom_toBottomOf="@+id/ivhometeamlogo"
+        app:layout_constraintTop_toTopOf="@+id/ivhometeamlogo"
+        app:layout_constraintVertical_bias="0.506"
+        app:srcCompat="@drawable/versus"
+        tools:layout_editor_absoluteX="180dp"/>
+
+
+</android.support.constraint.ConstraintLayout>

@@ -29,6 +29,7 @@ public class GameBoardActivityTest {
         Assert.assertEquals(expectedPlayerId,actualPlayerId);
 
     }
+
     @Test
     public void addPledgesTest() {
         //Arrange
@@ -106,4 +107,5 @@ public class GameBoardActivityTest {
 
 
     }
+
 }

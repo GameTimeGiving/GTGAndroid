@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.Group;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
@@ -20,10 +22,12 @@ import com.braintreepayments.api.dropin.DropInResult;
 import com.gametimegiving.android.Helpers.Constant;
 import com.gametimegiving.android.Helpers.CustomizeDialog;
 import com.gametimegiving.android.Helpers.GlideApp;
+import com.gametimegiving.android.Helpers.TeamSelectorDialog;
 import com.gametimegiving.android.Helpers.Utilities;
 import com.gametimegiving.android.R;
 import com.gametimegiving.android.models.Game;
 import com.gametimegiving.android.models.Player;
+import com.gametimegiving.android.models.Team;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -32,6 +36,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -55,7 +60,7 @@ import cz.msebera.android.httpclient.Header;
 
 public class GameBoardActivity extends GTGBaseActivity implements View.OnClickListener {
     private final static int SUBMIT_PAYMENT_REQUEST_CODE = 100;
-    //final public FirebaseFirestore db = FirebaseFirestore.getInstance();
+    final public FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final String TAG = getClass().getSimpleName();
     final String API_GET_TOKEN = "http://x1.gametimegiving.com/experiment/GenerateToken";
     final String API_CHECK_OUT = "http://x1.gametimegiving.com/experiment/CreateTransaction";
@@ -90,13 +95,13 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     String myteam = "away";
     String playerID;
     int iMyPledgeTotal;
-
-
+    ArrayList<Team> TeamsFromGameArray;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         DetermineHomeOrAway();
         playerID = ReadSharedPref("player", this);
+        Log.d(TAG, "Flow Step#1");
         mPlayer.setId(playerID);
         setContentView(R.layout.gameboard);
         //     GTGSnackBar(findViewById(R.id.GameBoardLayout), "On Create");
@@ -139,6 +144,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         mPlayer.setId(playerID);
     }
     public void GetAGame() {
+        Log.d(TAG, "Flow Step#2");
         mGame.DetermineCurrentGame(this);
         if (mGame.getGameid() != null) {
             DocumentReference gameRef = db.collection("games").document(mGame.getGameid());
@@ -152,12 +158,14 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                     }
 
                     if (snapshot != null && snapshot.exists()) {
-                        Log.d(TAG, "Current data: " + snapshot.getData());
+                        // Log.d(TAG, "Current data: " + snapshot.getData());
                         mGame = snapshot.toObject(Game.class);
                         mGame.setGameid(gameRef.getId());
                         GetTeamLogos();
-                        SetGameBoardMode(mGame);
+                        GetPersonalPledge();
+                        SetGameBoardMode(mGame, mPlayer);
                         isFirstTimeIn(mGame);
+
 
                     } else {
                         Log.d(TAG, "Current data: null");
@@ -170,8 +178,65 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         }
     }
 
+    public void ShowTeamSelectorDialog() {
+        DialogFragment newFragment = new TeamSelectorDialog();
+        FragmentManager fm = getSupportFragmentManager();
+        newFragment.show(fm, "team");
+    }
 
 
+    public void GetPersonalPledge() {
+        Log.d(TAG, "Flow Step#4");
+        playerID = DeterminePlayer();
+        if (playerID != "" && playerID != null) {
+            DocumentReference playerRef = db.collection("players").document(playerID);
+            playerRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        mPlayer = document.toObject(Player.class);
+                        WriteIntSharedPref("mypledgetotal", mPlayer.getPledgetotal());
+//                        SetGameBoardMode(mGame,mPlayer);
+//                        isFirstTimeIn(mGame);
+//                        UpDatePersonalPledgeTotal();
+                    }
+                }
+
+            });
+        } else {
+            if (isFirstTimeIn(mGame) == false) {
+                String message = "Oops! We couldn't find a player id";
+                GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
+
+            }
+        }
+    }
+
+    public ArrayList<Game> GetGames() {
+        // int gameId = 001;
+        ArrayList<Game> listOfGames = new ArrayList<Game>();
+        db.collection("games")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Log.d(TAG, document.getId() + " => " + document.getData());
+                            Game game = document.toObject(Game.class);
+                            listOfGames.add(game);
+                        }
+                    }
+                });
+        return listOfGames;
+    }
+
+    private void ClearGameBoard() {
+        mGame.setHometeamscore(0);
+        mGame.setAwayteamscore(0);
+        mGame.setTimeleft("00:00");
+        mGame.setHometeampledgetotal(0);
+        mGame.setAwayteampledgetotal(0);
+        mPlayer.setPledgetotal(0);
+    }
     private void DetermineHomeOrAway() {
         String homeoraway = "away";
         mPlayer.setMyteam(homeoraway);
@@ -209,6 +274,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     }
 
     private void GetTeamLogos() {
+        Log.d(TAG, "Flow Step #3");
         FirebaseStorage storage = FirebaseStorage.getInstance();
         String homeTeamLogo = mGame.getHometeam().getLogo();
         String awayTeamLogo = mGame.getAwayteam().getLogo();
@@ -224,107 +290,48 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         }
     }
 
-    public void GetPersonalPledge() {
-        playerID = DeterminePlayer();
-        if (playerID != "" && playerID != null) {
-            DocumentReference playerRef = db.collection("players").document(playerID);
-            playerRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        mPlayer = document.toObject(Player.class);
-                        Log.d(TAG, String.format("Inside Get Personal Pledge the personal pledge of %s", Integer.toString(mPlayer.getPledgetotal())));
-                        WriteIntSharedPref("mypledgetotal", mPlayer.getPledgetotal());
-                        UpDatePersonalPledgeTotal();
-                    }
-                }
-
-            });
-        } else {
-            if (isFirstTimeIn(mGame) == false) {
-                String message = "Oops! We couldn't find a player id";
-                GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
-
-            }
-        }
-    }
-
     private void UpDatePersonalPledgeTotal() {
-        int MyTotal = 0;
-        try {
-            MyTotal = mPlayer.getPledgetotal();
-        } catch (Exception e) {
-            MyTotal = 0;
-        }
-
-        tv_MyTotalPledgeTotals.setText(Utilities.FormatCurrency(MyTotal));
-        btnPayNow.setText(String.format("Donate %s ", tv_MyTotalPledgeTotals.getText()));
-
+        Log.d(TAG, String.format("Updating the Personal Pledge Total with %s", mPlayer.getPledgetotal()));
+        iMyPledgeTotal = mPlayer.getPledgetotal();
+        WriteIntSharedPref("mypledgetotal", iMyPledgeTotal);
+        String formattedPledgeAmount = Utilities.FormatCurrency(iMyPledgeTotal);
+        tv_MyTotalPledgeTotals.setText(formattedPledgeAmount);
     }
 
-    public ArrayList<Game> GetGames() {
-        // int gameId = 001;
-        ArrayList<Game> listOfGames = new ArrayList<Game>();
-        db.collection("games")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Log.d(TAG, document.getId() + " => " + document.getData());
-                            Game game = document.toObject(Game.class);
-                            listOfGames.add(game);
-                        }
-                    }
-                });
-        return listOfGames;
-    }
-
-    private void SetGameBoardMode(Game mGame) {
+    private void SetGameBoardMode(Game mGame, Player mPlayer) {
+        Log.d(TAG, "Flow Step#5");
         Group pledgeButtons = findViewById(R.id.pledgeButtons);
         switch (mGame.getGamestatus()) {
             case Constant.GAMENOTSTARTED:
+                tv_GamePeriod.setText("00:00");
                 pledgeButtons.setVisibility(View.GONE);
                 btnPayNow.setVisibility(View.GONE);
                 tvGameNotStarted.setText("Game Not Started");
                 tvGameNotStarted.setVisibility(View.VISIBLE);
                 ClearGameBoard();
-
                 break;
             case Constant.GAMEINPROGRESS:
+                tv_GamePeriod.setText(String.format("%s in the %s", mGame.getTimeleft(), mGame.getPeriod()));
                 pledgeButtons.setVisibility(View.VISIBLE);
                 btnPayNow.setVisibility(View.GONE);
                 tvGameNotStarted.setVisibility(View.GONE);
-                GetPersonalPledge();
-                // ShowWelcomeDialog(Constant.GAMEINPROGRESS);
                 break;
             case Constant.GAMEOVER:
+                tv_GamePeriod.setText("Game Over");
                 GetClientToken();
-                GetPersonalPledge();
-                    pledgeButtons.setVisibility(View.GONE);
+                pledgeButtons.setVisibility(View.GONE);
                 tvGameNotStarted.setVisibility(View.GONE);
+                Log.d(TAG, String.format("Game Over Personal Pledge total is %s", String.valueOf(mPlayer.getPledgetotal())));
                 iMyPledgeTotal = ReadIntSharedPref("mypledgetotal", this);
-                Toast.makeText(this, String.valueOf(iMyPledgeTotal), Toast.LENGTH_LONG).show();
                 if (iMyPledgeTotal > 0) {
+                    btnPayNow.setText(String.format("Donate %s ", tv_MyTotalPledgeTotals.getText()));
                     btnPayNow.setVisibility(View.VISIBLE);
                     btnPayNow.setEnabled(false);
                 }
-                tv_GamePeriod.setText("Game Over");
-
                 break;
         }
         UpdateGameBoard(mGame);
     }
-
-    private void ClearGameBoard() {
-        mGame.setHometeamscore(0);
-        mGame.setAwayteamscore(0);
-        mGame.setTimeleft("00:00");
-        mGame.setHometeampledgetotal(0);
-        mGame.setAwayteampledgetotal(0);
-        mPlayer.setPledgetotal(0);
-        UpDatePersonalPledgeTotal();
-    }
-
 
     public void onBraintreeSubmit(View v) {
         btnPayNow.setEnabled(false);
@@ -357,7 +364,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     }
 
 
-    void SendPaymentMethod(String nonce, double amt) {
+    public void SendPaymentMethod(String nonce, double amt) {
         RequestParams params = new RequestParams();
         params.put("nonce", nonce);
         params.put("amt", amt);
@@ -381,12 +388,12 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         );
     }
 
-    void addPledges(int amount) {
+    public void addPledges(int amount) {
         String gameid = ReadSharedPref("gameid", this);
         String user = ReadSharedPref("user", this);
         String player = ReadSharedPref("player", this);
         String myteam = ReadSharedPref("myteam", this);
-        if (gameid != null && user != null && player != null && myteam != null) {
+        if (gameid != "" && user != "" && player != "" && myteam != "") {
             Map<String, Object> pledge = new HashMap<>();
             pledge.put("game", gameid);
             pledge.put("user", user);
@@ -416,24 +423,25 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
             openDailogPledgesAdd(amount);
         } else {
             String missingItem = "";
-            if (gameid == null) {
+            if (gameid == "") {
                 missingItem = "GameId";
                 mGame.DetermineCurrentGame(this);
             }
-            if (user == null) {
+            if (user == "") {
                 missingItem = "UserId";
             }
-            if (player == null) {
+            if (player == "") {
                 missingItem = "PlayerId";
                 DeterminePlayer();
             }
-            if (myteam == null) {
+            if (myteam == "") {
                 missingItem = "Your Team";
                 DetermineHomeOrAway();
             }
             String message = String.format("Oops! Invalid Pledge... We can't find %s Try Again!", missingItem);
             GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
         }
+
     }
 
     public String DeterminePlayer() {
@@ -451,8 +459,9 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                             if (document.exists()) {
                                 mPlayer = document.toObject(Player.class);
                                 mPlayer.setId(document.getId());
-                                Utilities.WriteStringSharedPref("player", mPlayer.getId(), GameBoardActivity.this);
-                                //  WriteIntSharedPref("mypledgetotal",mPlayer.getPledgetotal());
+                                playerID = document.getId();
+                                Utilities.WriteStringSharedPref("player", document.getId(), GameBoardActivity.this);
+                                WriteIntSharedPref("mypledgetotal", mPlayer.getPledgetotal());
                             }
 
                         }
@@ -462,8 +471,6 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         }
         return playerID;
     }
-
-
 
     private void UpdateGameBoardLocal(String myTeam, int pledgeAmount) {
         int hometeampledgetotal = utilities.RemoveCurrency(tv_HomeTeamPledgeTotals.getText().toString());
@@ -484,11 +491,14 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         mUndoLastPledge.setEnabled(false);
     }
 
-    private void CreatePlayer(int firstPledgeAmount) {
+    public void CreatePlayer(int firstPledgeAmount) {
+        String gameid = mGame.getGameid();
+        String user = mPlayer.getUser();
+        if (user == null || user == "") user = GetUserIdFromSharedPrefs();
         Map<String, Object> data = new HashMap<>();
-        data.put("game", mGame.getGameid());
+        data.put("game", gameid);
         data.put("pledgetotal", 0);
-        data.put("user", mPlayer.getUser());
+        data.put("user", user);
         db.collection("players")
                 .add(data)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -496,19 +506,18 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d(TAG, "Player created " + documentReference.getId());
                         mPlayer.setId(documentReference.getId());
-                        Utilities.WriteStringSharedPref("playerid", documentReference.getId(), GameBoardActivity.this);
+                        Utilities.WriteStringSharedPref("player", documentReference.getId(), GameBoardActivity.this);
                         addPledges(firstPledgeAmount);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "Error Creating Player:" + e.toString(), e);
+
+                        Toast.makeText(getParent(), "Error Creating Player:", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
-
-
 
     @Override
     public void onClick(View v) {
@@ -541,23 +550,28 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                 break;
         }
 
+        DemoMode();
+    }
+
+    private void DemoMode() {
+        boolean DemoMode;
         DemoMode = ReadBoolSharedPref("demo", this);
         if (DemoMode == true) {
+            int democlickcount = 3;
             int remainingpledges = 0;
             int pledgecount = GetPledgeCount();
-            if (pledgecount > 4) {
+            if (pledgecount > democlickcount - 1) {
                 UpdateGameStatus(Constant.GAMEOVER);
                 WriteBoolSharedPref("demo", false);
                 WriteIntSharedPref("pledgecount", 0);
             } else {
-                remainingpledges = 5 - pledgecount;
+                remainingpledges = democlickcount - pledgecount;
                 pledgecount++;
                 WriteIntSharedPref("pledgecount", pledgecount);
                 GTGSnackBar(findViewById(R.id.GameBoardLayout), String.format("Pledge %s more times, to continue demo", String.valueOf(remainingpledges)));
             }
         }
     }
-
 
 
     public void openDailogPledgesAdd(int pledge_value) {
@@ -585,13 +599,14 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
 
 
     public void UpdateGameBoard(Game mGame) {
-        String timeleft = "";
-        if (mGame.getGamestatus() == Constant.GAMEOVER) {
-            timeleft = "Game Over";
-        } else {
-            timeleft = String.format("%s in the %s", mGame.getTimeleft(), mGame.getPeriod());
-        }
-        tv_GamePeriod.setText(timeleft);
+//        String timeleft = "Not Started";
+//        Log.d(TAG,String.format("The game status is %s",mGame.getGamestatus()));
+//       if (mGame.getGamestatus().contentEquals(Constant.GAMEOVER)) {
+//            timeleft = "Game Over";
+//        } else {
+//            timeleft = String.format("%s in the %s", mGame.getTimeleft(), mGame.getPeriod());
+//        }
+        // tv_GamePeriod.setText(timeleft);
         tv_homeTeamScore.setText(Integer.toString(mGame.getHometeamscore()));
         tv_AwayTeamScore.setText(Integer.toString(mGame.getAwayteamscore()));
         tv_HomeTeamName.setText(mGame.getHometeam().getTeamname());

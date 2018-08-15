@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class GTGBaseActivity extends AppCompatActivity {
-    final public FirebaseFirestore db = FirebaseFirestore.getInstance();
+    // final public FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final String TAG = "GTGBaseActivity";
     public User gtguser;
     public Uri photoUrl;
@@ -241,9 +241,9 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
     private void RunDemo() {
         //Set the Game status to Not Started
         //   String demoplayerid="sS0p0a631HWTcZUaIATy";
-        String message = "Operating in Demo Mode... Please wait 10 seconds";
-        // GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
-        GTGToast(message);
+        String message = "Operating in Demo Mode... Please wait 5 seconds";
+        GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
+        // GTGToast(message);
         WriteBoolSharedPref("demo", true);
         UpdateGameStatus(Constant.GAMENOTSTARTED);
         // Utilities.WriteStringSharedPref("player", demoplayerid,this);
@@ -263,6 +263,7 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
     }
 
     public void UpdateGameStatus(String status) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
         Map<String, Object> game = new HashMap<>();
         game.put("gamestatus", status);
         db.collection("games").document("suYroi6ZuratHkBDuyF7")
@@ -299,7 +300,7 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
         return  ReadSharedPref("player", this);
     }
     public boolean isFirstTimeIn(Game game) {
-
+        Log.d(TAG, "Flow Step#6");
         String status = "";
         firstTimer = true;
         boolean val = ReadBoolSharedPref("firsttimein", this);

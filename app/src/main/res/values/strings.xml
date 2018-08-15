@@ -37,5 +37,7 @@
     <string name="clearprefs">Reset</string>
     <string name="termsofserviceurl">https://www.gametimegiving.com/terms.html</string>
     <string name="privacypolicyurl">https://www.gametimegiving.com/privacy.html</string>
+    <string name="Cancel">Cancel</string>
+    <string name="pickyourteam">Select Your Team</string>
 
 </resources>
