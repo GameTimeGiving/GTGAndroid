@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="300dp"
-    android:layout_height="250dp"
+    android:layout_height="255dp"
     android:background="#FFFFFF"
     android:gravity="center"
     android:orientation="vertical"
@@ -17,11 +17,10 @@
         android:layout_marginTop="8dp"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="@+id/ivhometeamlogo"
-        app:layout_constraintHorizontal_bias="0.56"
+        app:layout_constraintHorizontal_bias="0.38"
         app:layout_constraintStart_toStartOf="@+id/ivhometeamlogo"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Richwood"
-        />
+        app:layout_constraintTop_toBottomOf="@+id/lblselectyourteam"
+        tools:text="Richwood"/>
 
     <TextView
         android:id="@+id/tvhometeammascot"
@@ -43,12 +42,15 @@
         android:id="@+id/tvawayteamname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
         android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/ivawayteamlogo"
         app:layout_constraintEnd_toEndOf="@+id/ivawayteamlogo"
-        app:layout_constraintHorizontal_bias="0.64"
+        app:layout_constraintHorizontal_bias="0.578"
         app:layout_constraintStart_toStartOf="@+id/ivawayteamlogo"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lblselectyourteam"
+        app:layout_constraintVertical_bias="0.45"
         tools:text="Wossman"/>
 
     <TextView
@@ -70,14 +72,14 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginBottom="8dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:contentDescription="@string/placeholder"
         app:layout_constraintBottom_toTopOf="@+id/tvhometeammascot"
         app:layout_constraintEnd_toEndOf="@+id/tvhometeammascot"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/tvhometeammascot"
         app:layout_constraintTop_toBottomOf="@+id/tvhometeamname"
-        app:layout_constraintVertical_bias="0.50"
+        app:layout_constraintVertical_bias="0.53999996"
         app:srcCompat="@drawable/bt_ic_android_pay"/>
 
     <ImageButton
@@ -108,9 +110,10 @@
         android:text="@string/Cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/versus"
-        app:layout_constraintVertical_bias="1.0"/>
+        app:layout_constraintVertical_bias="0.666"/>
 
     <ImageView
         android:id="@+id/versus"
@@ -120,13 +123,23 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="88dp"
         app:layout_constraintBottom_toBottomOf="@+id/ivhometeamlogo"
         app:layout_constraintEnd_toStartOf="@+id/ivawayteamlogo"
         app:layout_constraintStart_toEndOf="@+id/ivhometeamlogo"
-        app:layout_constraintTop_toTopOf="@+id/ivhometeamlogo"
-        app:layout_constraintVertical_bias="0.769"
         app:srcCompat="@drawable/versus"/>
+
+    <TextView
+        android:id="@+id/lblselectyourteam"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/select_your_team"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@color/tw__composer_black"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
 
 </android.support.constraint.ConstraintLayout>

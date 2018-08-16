@@ -27,5 +27,10 @@ public class Constant {
     public static final int FIRSTPLEDGEAMT = 1;
     public static final int SECONDPLEDGEAMT = 3;
     public static final int THIRDPLEDGEAMT = 5;
+    public static final String TEAMSIFOLLOW = "teamsifollow";
+    public static final String MYTEAM = "myteam";
+    public static final String PLAYERID = "player";
+
+
 
 }

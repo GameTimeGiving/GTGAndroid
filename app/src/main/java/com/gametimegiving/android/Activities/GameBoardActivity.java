@@ -50,7 +50,9 @@ import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -241,7 +243,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     }
     private void DetermineHomeOrAway() {
         String homeoraway = "";
-        String MyTeams = ReadSharedPref("myteams", this);
+        String MyTeams = ReadSharedPref(Constant.TEAMSIFOLLOW, this);
         String HomeTeam = mGame.getHometeam().getTeamname();
         String AwayTeam = mGame.getAwayteam().getTeamname();
         if (MyTeams.contains(HomeTeam)) homeoraway = "home";
@@ -640,6 +642,8 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                 String message = String.format("You have picked %s %s as your team. Let's Play!",
                         game.getHometeam().getTeamname(), game.getHometeam().getMascot());
                 GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
+                Utilities.WriteStringSharedPref(Constant.MYTEAM, "home", GameBoardActivity.this);
+                AddTeamToProfile(game.getHometeam());
                 teamchooserDialog.dismiss();
             }
         });
@@ -649,10 +653,20 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                 String message = String.format("You have picked %s %s as your team. Let's Play!",
                         game.getAwayteam().getTeamname(), game.getAwayteam().getMascot());
                 GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
+                Utilities.WriteStringSharedPref(Constant.MYTEAM, "away", GameBoardActivity.this);
+                AddTeamToProfile(game.getAwayteam());
                 teamchooserDialog.dismiss();
             }
         });
 
+    }
+
+    private void AddTeamToProfile(Team team) {
+        String teamsIFollow = ReadSharedPref(Constant.TEAMSIFOLLOW, this);
+        List<String> teamArray = new ArrayList<>(Arrays.asList(teamsIFollow.split("|")));
+        String teamname = String.format("%s %s", team.getTeamname(), team.getMascot());
+        teamArray.add(teamname);
+        Utilities.WriteStringSharedPref(Constant.TEAMSIFOLLOW, teamArray.toString(), GameBoardActivity.this);
     }
     public void UpdateGameBoard(Game mGame) {
 //        String timeleft = "Not Started";
