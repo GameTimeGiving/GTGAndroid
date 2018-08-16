@@ -12,6 +12,7 @@ import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -99,7 +100,6 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        DetermineHomeOrAway();
         playerID = ReadSharedPref("player", this);
         Log.d(TAG, "Flow Step#1");
         mPlayer.setId(playerID);
@@ -135,6 +135,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         btnPayNow = findViewById(R.id.btnpaynow);
         pledgeButtons = findViewById(R.id.pledgeButtons);
         GetAGame();
+
     }
 
     @Override
@@ -161,9 +162,10 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
                         // Log.d(TAG, "Current data: " + snapshot.getData());
                         mGame = snapshot.toObject(Game.class);
                         mGame.setGameid(gameRef.getId());
-                        GetTeamLogos();
+                        GetTeamLogos(ivHomeTeamLogo, ivAwayTeamLogo);
                         GetPersonalPledge();
                         SetGameBoardMode(mGame, mPlayer);
+                        DetermineHomeOrAway();
                         isFirstTimeIn(mGame);
 
 
@@ -238,9 +240,19 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         mPlayer.setPledgetotal(0);
     }
     private void DetermineHomeOrAway() {
-        String homeoraway = "away";
-        mPlayer.setMyteam(homeoraway);
-        Utilities.WriteStringSharedPref("myteam", homeoraway, this);
+        String homeoraway = "";
+        String MyTeams = ReadSharedPref("myteams", this);
+        String HomeTeam = mGame.getHometeam().getTeamname();
+        String AwayTeam = mGame.getAwayteam().getTeamname();
+        if (MyTeams.contains(HomeTeam)) homeoraway = "home";
+        if (MyTeams.contains(AwayTeam)) homeoraway = "away";
+        if (homeoraway == "") {
+            openDailogTeamChooser(mGame);
+            GTGSnackBar(findViewById(R.id.GameBoardLayout), "Pick Your Team");
+        } else {
+            mPlayer.setMyteam(homeoraway);
+            Utilities.WriteStringSharedPref("myteam", homeoraway, this);
+        }
     }
 
     private void GetClientToken() {
@@ -273,8 +285,7 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
 
     }
 
-    private void GetTeamLogos() {
-        Log.d(TAG, "Flow Step #3");
+    private void GetTeamLogos(ImageView homelogo, ImageView awaylogo) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         String homeTeamLogo = mGame.getHometeam().getLogo();
         String awayTeamLogo = mGame.getAwayteam().getLogo();
@@ -283,10 +294,12 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         if (!this.isFinishing()) {
         GlideApp.with(this /* context */)
                 .load(homeTeamLogoReference)
-                .into(ivHomeTeamLogo);
+                .into(homelogo);
+            //          .into(ivHomeTeamLogo);
         GlideApp.with(this /* context */)
                 .load(awayTeamLogoReference)
-                .into(ivAwayTeamLogo);
+                .into(awaylogo);
+            //        .into(ivAwayTeamLogo);
         }
     }
 
@@ -597,7 +610,50 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
         }, 2000);
     }
 
+    public void openDailogTeamChooser(Game game) {
+        CustomizeDialog teamchooserDialog = new CustomizeDialog(this);
+        teamchooserDialog.setContentView(R.layout.chooseteamdialog);
+        TextView tvHomeTeamName = teamchooserDialog.findViewById(R.id.tvhometeamname);
+        TextView tvAwayTeamName = teamchooserDialog.findViewById(R.id.tvawayteamname);
+        TextView tvHomeTeamMascot = teamchooserDialog.findViewById(R.id.tvhometeammascot);
+        TextView tvAwayTeamMascot = teamchooserDialog.findViewById(R.id.tvawayteammascot);
+        ImageButton ibHomeTeamLogo = teamchooserDialog.findViewById(R.id.ivhometeamlogo);
+        ImageButton ibAwayTeamLogo = teamchooserDialog.findViewById(R.id.ivawayteamlogo);
+        //  teamchooserDialog.setCancelable(false);
+        tvHomeTeamName.setText(game.getHometeam().getTeamname());
+        tvAwayTeamName.setText(game.getAwayteam().getTeamname());
+        tvHomeTeamMascot.setText(game.getHometeam().getMascot());
+        tvAwayTeamMascot.setText(game.getAwayteam().getMascot());
+        GetTeamLogos(ibHomeTeamLogo, ibAwayTeamLogo);
+        teamchooserDialog.show();
+//
+        Button btnCancel = teamchooserDialog.findViewById(R.id.btncancel);
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                teamchooserDialog.dismiss();
+            }
+        });
+        ibHomeTeamLogo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String message = String.format("You have picked %s %s as your team. Let's Play!",
+                        game.getHometeam().getTeamname(), game.getHometeam().getMascot());
+                GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
+                teamchooserDialog.dismiss();
+            }
+        });
+        ibAwayTeamLogo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String message = String.format("You have picked %s %s as your team. Let's Play!",
+                        game.getAwayteam().getTeamname(), game.getAwayteam().getMascot());
+                GTGSnackBar(findViewById(R.id.GameBoardLayout), message);
+                teamchooserDialog.dismiss();
+            }
+        });
 
+    }
     public void UpdateGameBoard(Game mGame) {
 //        String timeleft = "Not Started";
 //        Log.d(TAG,String.format("The game status is %s",mGame.getGamestatus()));
