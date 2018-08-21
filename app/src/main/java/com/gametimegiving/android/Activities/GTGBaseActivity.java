@@ -64,6 +64,7 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
             email = user.getEmail();
             photoUrl = user.getPhotoUrl();
             gtguser = new User(userId, name, email, photoUrl);
+
         }
     }
 
