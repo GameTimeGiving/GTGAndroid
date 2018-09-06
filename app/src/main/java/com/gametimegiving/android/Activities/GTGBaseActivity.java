@@ -205,7 +205,7 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
     }
 
     public int GetPledgeCount() {
-        int Count = ReadIntSharedPref("pledgecount", this);
+        int Count = ReadIntSharedPref(getString(R.string.pledgeCountSharedPrefName), this);
         return Count;
     }
 
@@ -289,9 +289,13 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
     }
 
     public void GTGSnackBar(View v, String Message) {
-        Snackbar.make(v
-                , String.format(Message),
-                Snackbar.LENGTH_LONG).show();
+        try {
+            Snackbar.make(v, Message, Snackbar.LENGTH_LONG).show();
+        } catch (IllegalArgumentException ex) {
+            Log.e(TAG, "Error showing Snack Bar: " + ex.toString());
+
+        }
+
     }
     public String GetUserIdFromSharedPrefs() {
         return  ReadSharedPref("user", this);
@@ -301,7 +305,6 @@ public abstract class GTGBaseActivity extends AppCompatActivity {
         return  ReadSharedPref("player", this);
     }
     public boolean isFirstTimeIn(Game game) {
-        Log.d(TAG, "Flow Step#6");
         String status = "";
         firstTimer = true;
         boolean val = ReadBoolSharedPref("firsttimein", this);

@@ -8,8 +8,8 @@ android {
         applicationId "com.gametimegiving.android"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 13
-        versionName "1.41 Alpha"
+        versionCode 16
+        versionName "1.44"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resConfigs "en"
         multiDexEnabled true
@@ -17,6 +17,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+
     }
     buildTypes {
         release {

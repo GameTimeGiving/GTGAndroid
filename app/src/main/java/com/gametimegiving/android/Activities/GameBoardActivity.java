@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.constraint.Group;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.text.Html;
@@ -49,6 +48,7 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 
+import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -65,8 +65,8 @@ public class GameBoardActivity extends GTGBaseActivity implements View.OnClickLi
     private final static int SUBMIT_PAYMENT_REQUEST_CODE = 100;
     final public FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final String TAG = getClass().getSimpleName();
-    final String API_GET_TOKEN = "http://x1.gametimegiving.com/experiment/GenerateToken";
-    final String API_CHECK_OUT = "http://x1.gametimegiving.com/experiment/CreateTransaction";
+    final String API_GET_TOKEN = Constant.API_GET_TOKEN;
+    final String API_CHECK_OUT = Constant.API_CHECK_OUT;
     final int REQUEST_CODE = 999;
     public Game mGame = new Game();
     public Player mPlayer = new Player();

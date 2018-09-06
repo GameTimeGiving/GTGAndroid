@@ -40,5 +40,6 @@
     <string name="Cancel">Cancel</string>
     <string name="pickyourteam">Select Your Team</string>
     <string name="select_your_team">Select Your Team</string>
+    <string name="pledgeCountSharedPrefName">pledgecount</string>
 
 </resources>

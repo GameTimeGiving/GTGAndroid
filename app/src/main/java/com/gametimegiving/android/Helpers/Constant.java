@@ -30,6 +30,8 @@ public class Constant {
     public static final String TEAMSIFOLLOW = "teamsifollow";
     public static final String MYTEAM = "myteam";
     public static final String PLAYERID = "player";
+    public static final String API_GET_TOKEN = "https://api.gametimegiving.com/Braintree/GenerateToken";
+    public static final String API_CHECK_OUT = "https://api.gametimegiving.com/Braintree/CreateTransaction";
 
 
 
